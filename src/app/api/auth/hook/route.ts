@@ -73,8 +73,20 @@ export async function POST(request: NextRequest) {
     }
 
     const { user, email_data } = payload
+
+    // Defensive checks for payload structure
+    if (!user || !email_data) {
+      console.error("Invalid payload structure - missing user or email_data:", { user: !!user, email_data: !!email_data })
+      return NextResponse.json({ error: "Invalid payload structure" }, { status: 400 })
+    }
+
     const type = email_data.email_action_type
-    console.log("Processing email hook - type:", type, "user:", user?.email)
+    if (!type) {
+      console.error("Missing email_action_type in payload. email_data keys:", Object.keys(email_data))
+      return NextResponse.json({ error: "Missing email action type" }, { status: 400 })
+    }
+
+    console.log("Processing email hook - type:", type, "user:", user?.email, "token_hash:", email_data.token_hash?.substring(0, 10) + "...")
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
       ? `https://${process.env.NEXT_PUBLIC_APP_URL.replace(/^https?:\/\//, "")}`
@@ -174,7 +186,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Auth hook error:", error)
+    console.error("Auth hook error:", error instanceof Error ? { message: error.message, stack: error.stack } : error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
