@@ -2,10 +2,16 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Utensils, Camera, BarChart3, Sparkles } from "lucide-react"
-import { motion } from "framer-motion"
+import { CheckCircle, Utensils, Camera, BarChart3, Sparkles, Download, Share, X, Smartphone } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
+}
 
 const steps = [
   {
@@ -33,7 +39,12 @@ const steps = [
 
 export default function CompletePage() {
   const router = useRouter()
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstalled, setIsInstalled] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false)
 
+  // Confetti animation
   useEffect(() => {
     const end = Date.now() + 2000
     const colors = ["#22c55e", "#3b82f6", "#f97316"]
@@ -60,6 +71,57 @@ export default function CompletePage() {
     }
     frame()
   }, [])
+
+  // PWA install detection
+  useEffect(() => {
+    // Check if already installed
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    const isIOSStandalone = ("standalone" in window.navigator) && (window.navigator as Navigator & { standalone: boolean }).standalone
+
+    if (isStandalone || isIOSStandalone) {
+      setIsInstalled(true)
+    }
+
+    // Detect iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
+    setIsIOS(isIOSDevice)
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
+    }
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true)
+      setDeferredPrompt(null)
+      toast.success("App installed! Open CalorieCue from your home screen")
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    window.addEventListener("appinstalled", handleAppInstalled)
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      window.removeEventListener("appinstalled", handleAppInstalled)
+    }
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      return
+    }
+
+    await deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+
+    if (outcome === "accepted") {
+      toast.success("Installing CalorieCue...")
+    }
+
+    setDeferredPrompt(null)
+  }
+
+  const canShowInstall = !isInstalled && (isIOS || deferredPrompt)
 
   return (
     <motion.div
@@ -126,11 +188,118 @@ export default function CompletePage() {
         </div>
       </motion.div>
 
+      {/* Install App Section */}
+      {canShowInstall && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/20 border border-primary/30"
+        >
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+              <Smartphone className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1 space-y-3">
+              <div>
+                <h3 className="font-semibold text-white">Install CalorieCue</h3>
+                <p className="text-sm text-slate-400">
+                  Add to your home screen for quick access and offline support
+                </p>
+              </div>
+              <Button
+                onClick={isIOS ? () => setShowIOSInstructions(true) : handleInstallClick}
+                className="w-full bg-primary hover:bg-primary/90"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Install App
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* iOS Instructions Modal */}
+      <AnimatePresence>
+        {showIOSInstructions && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
+            onClick={() => setShowIOSInstructions(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl border border-slate-700"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Install CalorieCue</h3>
+                <button
+                  onClick={() => setShowIOSInstructions(false)}
+                  className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center"
+                >
+                  <X className="h-4 w-4 text-slate-300" />
+                </button>
+              </div>
+
+              <p className="text-sm text-slate-400">
+                To install CalorieCue on your iPhone, follow these steps:
+              </p>
+
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-semibold text-primary">1</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Tap the Share button</p>
+                    <p className="text-sm text-slate-400 flex items-center gap-1">
+                      Look for the <Share className="h-4 w-4 inline" /> icon at the bottom of Safari
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-semibold text-primary">2</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Scroll down and tap &quot;Add to Home Screen&quot;</p>
+                    <p className="text-sm text-slate-400">You may need to scroll to find it</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-semibold text-primary">3</span>
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">Tap &quot;Add&quot; in the top right</p>
+                    <p className="text-sm text-slate-400">CalorieCue will appear on your home screen</p>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowIOSInstructions(false)}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium"
+              >
+                Got it
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* CTA Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
+        transition={{ delay: canShowInstall ? 0.9 : 0.8 }}
       >
         <Button
           size="lg"
@@ -139,6 +308,11 @@ export default function CompletePage() {
         >
           Go to Dashboard
         </Button>
+        {canShowInstall && (
+          <p className="text-center text-sm text-slate-500 mt-2">
+            You can also install later from Settings
+          </p>
+        )}
       </motion.div>
     </motion.div>
   )
