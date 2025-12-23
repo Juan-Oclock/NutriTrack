@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense, useCallback } from "react"
+import { useState, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import dynamic from "next/dynamic"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
@@ -9,8 +10,20 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, ScanBarcode, Camera, AlertCircle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
-import { Html5Qrcode } from "html5-qrcode"
 import type { Food, InsertTables } from "@/types/database"
+
+// Dynamic import for Next.js SSR compatibility
+const Scanner = dynamic(
+  () => import("@yudiel/react-qr-scanner").then((mod) => mod.Scanner),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="aspect-[4/3] bg-black flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    ),
+  }
+)
 
 function BarcodeContent() {
   const searchParams = useSearchParams()
@@ -26,7 +39,6 @@ function BarcodeContent() {
   const [error, setError] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null)
-  const scannerRef = useRef<Html5Qrcode | null>(null)
   const supabase = createClient()
 
   const lookupBarcode = useCallback(async (barcode: string) => {
@@ -181,82 +193,15 @@ function BarcodeContent() {
     await lookupBarcode(barcode)
   }, [lastScannedCode, isLookingUp, lookupBarcode])
 
-  const startScanning = async () => {
-    try {
-      // Check if we're in a secure context (HTTPS or localhost)
-      if (!window.isSecureContext) {
-        setCameraError(
-          "Camera requires HTTPS. Please use localhost or enable HTTPS to scan barcodes. You can still enter the barcode manually below."
-        )
-        return
-      }
-
-      // Check if mediaDevices API is available
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setCameraError(
-          "Camera not supported on this device/browser. Please enter the barcode manually below."
-        )
-        return
-      }
-
-      setCameraError(null)
-      setLastScannedCode(null)
-      setIsScanning(true)
-
-      // Create scanner instance
-      const scanner = new Html5Qrcode("barcode-scanner")
-      scannerRef.current = scanner
-
-      // Start scanning
-      await scanner.start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 150 },
-          aspectRatio: 4 / 3,
-        },
-        (decodedText) => {
-          // On successful scan
-          handleBarcodeDetected(decodedText)
-        },
-        () => {
-          // QR code not found in frame - this is normal, no action needed
-        }
-      )
-
-      toast.info("Point camera at a barcode to scan")
-    } catch (err) {
-      console.error("Camera error:", err)
-      setIsScanning(false)
-
-      if (err instanceof Error && err.message.includes("Permission")) {
-        setCameraError("Camera permission denied. Please allow camera access and try again.")
-      } else {
-        setCameraError("Could not access camera. Please enter barcode manually.")
-      }
-    }
+  const startScanning = () => {
+    setCameraError(null)
+    setLastScannedCode(null)
+    setIsScanning(true)
   }
 
-  const stopScanning = useCallback(async () => {
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop()
-        scannerRef.current.clear()
-      } catch (err) {
-        console.error("Error stopping scanner:", err)
-      }
-      scannerRef.current = null
-    }
+  const stopScanning = () => {
     setIsScanning(false)
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {})
-      }
-    }
-  }, [])
+  }
 
   return (
     <div className="max-w-lg mx-auto">
@@ -266,15 +211,58 @@ function BarcodeContent() {
         {/* Camera View */}
         <Card className="overflow-hidden">
           <div className="relative bg-black">
-            {/* Scanner container */}
-            <div
-              id="barcode-scanner"
-              className={`w-full ${isScanning ? 'block' : 'hidden'}`}
-              style={{ minHeight: isScanning ? '300px' : '0' }}
-            />
+            {isScanning ? (
+              <>
+                <Scanner
+                  onScan={(detectedCodes) => {
+                    const code = detectedCodes[0]
+                    if (code?.rawValue) {
+                      handleBarcodeDetected(code.rawValue)
+                    }
+                  }}
+                  onError={(error) => {
+                    console.error("Scanner error:", error)
+                    setCameraError("Could not access camera. Please enter barcode manually.")
+                    setIsScanning(false)
+                  }}
+                  constraints={{ facingMode: "environment" }}
+                  formats={["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39"]}
+                  scanDelay={500}
+                  styles={{
+                    container: { width: "100%", paddingTop: "75%" },
+                    video: { objectFit: "cover" },
+                  }}
+                />
 
-            {/* Start scanning button */}
-            {!isScanning && (
+                {/* Overlays */}
+                {isLookingUp && (
+                  <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
+                    <div className="bg-background rounded-lg p-4 flex items-center gap-3">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Looking up product...</span>
+                    </div>
+                  </div>
+                )}
+
+                {lastScannedCode && !isLookingUp && (
+                  <div className="absolute bottom-4 left-4 right-4 z-30">
+                    <div className="bg-background/90 rounded-lg p-2 flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="truncate">Scanned: {lastScannedCode}</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute top-4 right-4 z-30"
+                  onClick={stopScanning}
+                >
+                  Stop
+                </Button>
+              </>
+            ) : (
               <div className="aspect-[4/3] flex flex-col items-center justify-center text-white">
                 <ScanBarcode className="h-16 w-16 mb-4 opacity-50" />
                 <Button onClick={startScanning} disabled={!!cameraError}>
@@ -287,38 +275,6 @@ function BarcodeContent() {
                   </p>
                 )}
               </div>
-            )}
-
-            {/* Stop button and overlays when scanning */}
-            {isScanning && (
-              <>
-                {/* Loading indicator when looking up */}
-                {isLookingUp && (
-                  <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
-                    <div className="bg-background rounded-lg p-4 flex items-center gap-3">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>Looking up product...</span>
-                    </div>
-                  </div>
-                )}
-                {/* Last scanned indicator */}
-                {lastScannedCode && !isLookingUp && (
-                  <div className="absolute bottom-4 left-4 right-4 z-30">
-                    <div className="bg-background/90 rounded-lg p-2 flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-500" />
-                      <span className="truncate">Scanned: {lastScannedCode}</span>
-                    </div>
-                  </div>
-                )}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute top-4 right-4 z-30"
-                  onClick={stopScanning}
-                >
-                  Stop
-                </Button>
-              </>
             )}
           </div>
         </Card>
