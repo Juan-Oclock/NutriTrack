@@ -240,12 +240,29 @@ function BarcodeContent() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream
 
-        // Wait for video to be ready
-        await new Promise<void>((resolve) => {
-          if (videoRef.current) {
-            videoRef.current.onloadedmetadata = () => {
-              videoRef.current?.play().then(() => resolve())
-            }
+        // Wait for video to be ready and playing
+        await new Promise<void>((resolve, reject) => {
+          const video = videoRef.current
+          if (!video) {
+            reject(new Error("Video element not found"))
+            return
+          }
+
+          const onCanPlay = () => {
+            video.removeEventListener("canplay", onCanPlay)
+            video.play()
+              .then(() => {
+                console.log("Video playing, dimensions:", video.videoWidth, "x", video.videoHeight)
+                resolve()
+              })
+              .catch(reject)
+          }
+
+          // If video is already ready, play immediately
+          if (video.readyState >= 3) {
+            onCanPlay()
+          } else {
+            video.addEventListener("canplay", onCanPlay)
           }
         })
       }
@@ -324,17 +341,18 @@ function BarcodeContent() {
         {/* Camera View */}
         <Card className="overflow-hidden">
           <div className="relative aspect-[4/3] bg-black">
+            {/* Video element - always rendered but hidden when not scanning */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className={`absolute inset-0 w-full h-full object-cover ${isScanning ? 'block' : 'hidden'}`}
+            />
             {isScanning ? (
               <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
                 {/* Scanning overlay */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
                   <div className="relative w-64 h-32">
                     {/* Scanning frame */}
                     <div className="absolute inset-0 border-2 border-white/70 rounded-lg" />
@@ -349,7 +367,7 @@ function BarcodeContent() {
                 </div>
                 {/* Loading indicator when looking up */}
                 {isLookingUp && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
                     <div className="bg-background rounded-lg p-4 flex items-center gap-3">
                       <Loader2 className="h-5 w-5 animate-spin" />
                       <span>Looking up product...</span>
@@ -358,7 +376,7 @@ function BarcodeContent() {
                 )}
                 {/* Last scanned indicator */}
                 {lastScannedCode && !isLookingUp && (
-                  <div className="absolute bottom-4 left-4 right-4">
+                  <div className="absolute bottom-4 left-4 right-4 z-30">
                     <div className="bg-background/90 rounded-lg p-2 flex items-center gap-2 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
                       <span className="truncate">Scanned: {lastScannedCode}</span>
@@ -368,7 +386,7 @@ function BarcodeContent() {
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute top-4 right-4"
+                  className="absolute top-4 right-4 z-30"
                   onClick={stopScanning}
                 >
                   Stop
