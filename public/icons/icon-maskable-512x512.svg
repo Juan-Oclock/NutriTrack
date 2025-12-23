@@ -1,0 +1,18 @@
+
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#22c55e" rx="76.8"/>
+  <g transform="translate(76.8, 76.8)">
+    <circle cx="179.2" cy="179.2" r="143.36" fill="white" opacity="0.9"/>
+    <path d="M179.2 76.8
+             Q281.6 128 256 230.4
+             Q230.4 281.6 179.2 281.6
+             Q128 281.6 102.4 230.4
+             Q76.8 128 179.2 76.8
+             Z"
+          fill="#22c55e"/>
+    <path d="M179.2 112.64 L179.2 245.76"
+          stroke="#22c55e"
+          stroke-width="10.24"
+          stroke-linecap="round"/>
+  </g>
+</svg>
