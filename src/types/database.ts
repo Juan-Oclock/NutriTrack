@@ -411,6 +411,7 @@ export interface Database {
           logged_sodium_mg: number | null
           notes: string | null
           logged_at: string
+          logged_time: string | null
           created_at: string
           updated_at: string
         }
@@ -432,6 +433,7 @@ export interface Database {
           logged_sodium_mg?: number | null
           notes?: string | null
           logged_at?: string
+          logged_time?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -453,8 +455,44 @@ export interface Database {
           logged_sodium_mg?: number | null
           notes?: string | null
           logged_at?: string
+          logged_time?: string | null
           created_at?: string
           updated_at?: string
+        }
+      }
+      food_serving_options: {
+        Row: {
+          id: string
+          food_id: string | null
+          user_food_id: string | null
+          label: string
+          serving_size: number
+          serving_unit: string
+          multiplier: number
+          is_default: boolean | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          food_id?: string | null
+          user_food_id?: string | null
+          label: string
+          serving_size: number
+          serving_unit: string
+          multiplier?: number
+          is_default?: boolean | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          food_id?: string | null
+          user_food_id?: string | null
+          label?: string
+          serving_size?: number
+          serving_unit?: string
+          multiplier?: number
+          is_default?: boolean | null
+          created_at?: string | null
         }
       }
       quick_add_entries: {
@@ -706,5 +744,6 @@ export type MealPlanItem = Tables<"meal_plan_items">
 export type WeightLog = Tables<"weight_logs">
 export type MealScan = Tables<"meal_scans">
 export type UserStreak = Tables<"user_streaks">
+export type FoodServingOption = Tables<"food_serving_options">
 
 export type MealType = "breakfast" | "lunch" | "dinner" | "snacks"
