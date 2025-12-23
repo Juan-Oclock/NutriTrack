@@ -10,8 +10,21 @@ const inter = Inter({
   variable: "--font-sans",
 })
 
+// Helper to ensure URL has protocol
+function getBaseUrl(): URL {
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (!envUrl) {
+    return new URL("https://caloriecue.vercel.app")
+  }
+  // Add https:// if no protocol specified
+  if (!envUrl.startsWith("http://") && !envUrl.startsWith("https://")) {
+    return new URL(`https://${envUrl}`)
+  }
+  return new URL(envUrl)
+}
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://caloriecue.vercel.app"),
+  metadataBase: getBaseUrl(),
   title: {
     default: "CalorieCue - Calorie & Macro Tracker",
     template: "%s | CalorieCue",
