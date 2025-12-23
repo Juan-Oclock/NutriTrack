@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { Bell, Search, ChevronLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { motion } from "framer-motion"
 
 interface HeaderProps {
   title?: string
@@ -22,34 +22,39 @@ export function Header({
   const router = useRouter()
 
   return (
-    <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border safe-area-top">
+    <header className="sticky top-0 z-40 glass border-b border-border/50 safe-area-top">
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
         <div className="flex items-center gap-2">
           {showBack && (
-            <Button
-              variant="ghost"
-              size="icon"
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => router.back()}
-              className="-ml-2"
+              className="h-10 w-10 -ml-2 rounded-xl flex items-center justify-center hover:bg-muted transition-colors tap-highlight"
             >
               <ChevronLeft className="h-5 w-5" />
-            </Button>
+            </motion.button>
           )}
           {title && (
             <h1 className="text-lg font-semibold truncate">{title}</h1>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {showSearch && (
-            <Button variant="ghost" size="icon">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className="h-10 w-10 rounded-xl flex items-center justify-center hover:bg-muted transition-colors tap-highlight"
+            >
               <Search className="h-5 w-5" />
-            </Button>
+            </motion.button>
           )}
           {showNotifications && (
-            <Button variant="ghost" size="icon">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              className="h-10 w-10 rounded-xl flex items-center justify-center hover:bg-muted transition-colors tap-highlight relative"
+            >
               <Bell className="h-5 w-5" />
-            </Button>
+            </motion.button>
           )}
           {rightContent}
         </div>

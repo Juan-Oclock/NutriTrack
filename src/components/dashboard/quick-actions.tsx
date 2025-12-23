@@ -2,30 +2,64 @@
 
 import Link from "next/link"
 import { ScanBarcode, Camera, Search, Zap } from "lucide-react"
+import { motion } from "framer-motion"
 
 const actions = [
-  { href: "/add-food/barcode", label: "Scan Barcode", icon: ScanBarcode, color: "bg-blue-100 text-blue-600" },
-  { href: "/add-food/meal-scan", label: "Meal Scan", icon: Camera, color: "bg-purple-100 text-purple-600" },
-  { href: "/add-food/search", label: "Search Food", icon: Search, color: "bg-green-100 text-green-600" },
-  { href: "/add-food/quick-add", label: "Quick Add", icon: Zap, color: "bg-orange-100 text-orange-600" },
+  {
+    href: "/add-food/barcode",
+    label: "Scan",
+    icon: ScanBarcode,
+    gradient: "from-blue-500 to-blue-600",
+    shadow: "shadow-blue-500/25",
+  },
+  {
+    href: "/add-food/meal-scan",
+    label: "Photo",
+    icon: Camera,
+    gradient: "from-purple-500 to-purple-600",
+    shadow: "shadow-purple-500/25",
+  },
+  {
+    href: "/add-food/search",
+    label: "Search",
+    icon: Search,
+    gradient: "from-primary to-emerald-600",
+    shadow: "shadow-primary/25",
+  },
+  {
+    href: "/add-food/quick-add",
+    label: "Quick",
+    icon: Zap,
+    gradient: "from-orange-500 to-orange-600",
+    shadow: "shadow-orange-500/25",
+  },
 ]
 
 export function QuickActions() {
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {actions.map((action) => (
-        <Link
+    <div className="grid grid-cols-4 gap-2">
+      {actions.map((action, index) => (
+        <motion.div
           key={action.href}
-          href={action.href}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border hover:border-primary/50 transition-colors"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 + index * 0.05 }}
         >
-          <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${action.color}`}>
-            <action.icon className="h-5 w-5" />
-          </div>
-          <span className="text-xs font-medium text-center leading-tight">
-            {action.label}
-          </span>
-        </Link>
+          <Link
+            href={action.href}
+            className="flex flex-col items-center gap-2 tap-highlight"
+          >
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg ${action.shadow}`}
+            >
+              <action.icon className="h-6 w-6 text-white" />
+            </motion.div>
+            <span className="text-xs font-medium text-muted-foreground">
+              {action.label}
+            </span>
+          </Link>
+        </motion.div>
       ))}
     </div>
   )

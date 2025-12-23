@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CalorieRing } from "@/components/dashboard/calorie-ring"
 import { MacroBars } from "@/components/dashboard/macro-bars"
 import { StreakCard } from "@/components/dashboard/streak-card"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { formatDiaryDate, toDateString } from "@/lib/utils/date"
-import { ChevronRight, TrendingDown, Scale } from "lucide-react"
+import { ChevronRight, TrendingDown, Scale, BookOpen, ChartBar } from "lucide-react"
 import Link from "next/link"
+import { motion } from "framer-motion"
 import type { Profile, NutritionGoal, UserStreak } from "@/types/database"
 
 interface DailySummary {
@@ -123,11 +122,14 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-6 max-w-lg mx-auto">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-[200px] w-full rounded-xl" />
-        <Skeleton className="h-[120px] w-full rounded-xl" />
-        <Skeleton className="h-[80px] w-full rounded-xl" />
+      <div className="p-4 space-y-6 max-w-lg mx-auto pb-24">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+        <Skeleton className="h-[280px] w-full rounded-3xl" />
+        <Skeleton className="h-[80px] w-full rounded-2xl" />
+        <Skeleton className="h-[140px] w-full rounded-2xl" />
       </div>
     )
   }
@@ -139,43 +141,52 @@ export default function DashboardPage() {
     return "Good evening"
   }
 
-  return (
-    <div className="p-4 space-y-6 max-w-lg mx-auto">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold">
-          {greeting()}, {profile?.full_name?.split(" ")[0] || "there"}!
-        </h1>
-        <p className="text-muted-foreground">{formatDiaryDate(new Date())}</p>
-      </div>
+  const firstName = profile?.full_name?.split(" ")[0] || "there"
 
-      {/* Calorie Summary */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center">
-            <CalorieRing
-              consumed={todaySummary.calories}
-              goal={goals?.calories_goal || 2000}
+  return (
+    <div className="p-4 space-y-5 max-w-lg mx-auto pb-24">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="pt-2"
+      >
+        <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {greeting()}, {firstName}
+        </h1>
+      </motion.div>
+
+      {/* Main Calorie Card */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.1 }}
+        className="bg-card rounded-3xl p-6 elevation-2"
+      >
+        <div className="flex flex-col items-center">
+          <CalorieRing
+            consumed={todaySummary.calories}
+            goal={goals?.calories_goal || 2000}
+          />
+          <div className="mt-6 w-full">
+            <MacroBars
+              protein={{
+                consumed: todaySummary.protein,
+                goal: goals?.protein_goal_g || 150,
+              }}
+              carbs={{
+                consumed: todaySummary.carbs,
+                goal: goals?.carbs_goal_g || 250,
+              }}
+              fat={{
+                consumed: todaySummary.fat,
+                goal: goals?.fat_goal_g || 65,
+              }}
             />
-            <div className="mt-6 w-full">
-              <MacroBars
-                protein={{
-                  consumed: todaySummary.protein,
-                  goal: goals?.protein_goal_g || 150,
-                }}
-                carbs={{
-                  consumed: todaySummary.carbs,
-                  goal: goals?.carbs_goal_g || 250,
-                }}
-                fat={{
-                  consumed: todaySummary.fat,
-                  goal: goals?.fat_goal_g || 65,
-                }}
-              />
-            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       {/* Streak */}
       {streak && streak.current_streak > 0 && (
@@ -186,83 +197,101 @@ export default function DashboardPage() {
       )}
 
       {/* Quick Actions */}
-      <div>
-        <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35 }}
+      >
+        <h2 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+          Log Food
+        </h2>
         <QuickActions />
-      </div>
+      </motion.div>
 
-      {/* Weight Trend */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base font-medium flex items-center gap-2">
-              <Scale className="h-4 w-4 text-muted-foreground" />
-              Weight Trend
-            </CardTitle>
-            <Link href="/insights/weight">
-              <Button variant="ghost" size="sm" className="text-primary">
-                View All
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
+      {/* Quick Links */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="grid grid-cols-2 gap-3"
+      >
+        {/* View Diary */}
+        <Link href="/diary" className="tap-highlight">
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            className="bg-card rounded-2xl p-4 elevation-1 flex flex-col gap-3"
+          >
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-primary" />
+            </div>
             <div>
-              <p className="text-2xl font-bold">
-                {profile?.current_weight_kg?.toFixed(1) || "--"} kg
-              </p>
-              <p className="text-sm text-muted-foreground">Current weight</p>
+              <p className="font-medium text-sm">Food Diary</p>
+              <p className="text-xs text-muted-foreground">View meals</p>
             </div>
-            {profile?.target_weight_kg && (
-              <div className="text-right">
-                <div className="flex items-center gap-1 text-green-600">
-                  <TrendingDown className="h-4 w-4" />
-                  <span className="font-medium">
-                    {(profile.current_weight_kg! - profile.target_weight_kg).toFixed(1)} kg to go
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Goal: {profile.target_weight_kg} kg
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          </motion.div>
+        </Link>
 
-      {/* View Diary Link */}
-      <Link href="/diary" className="block">
-        <Card className="hover:border-primary/50 transition-colors">
-          <CardContent className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <svg
-                  className="h-5 w-5 text-primary"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">View Food Diary</p>
-                <p className="text-sm text-muted-foreground">
-                  See all your meals for today
-                </p>
-              </div>
+        {/* Insights */}
+        <Link href="/insights" className="tap-highlight">
+          <motion.div
+            whileTap={{ scale: 0.97 }}
+            className="bg-card rounded-2xl p-4 elevation-1 flex flex-col gap-3"
+          >
+            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+              <ChartBar className="h-5 w-5 text-blue-500" />
             </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </CardContent>
-        </Card>
-      </Link>
+            <div>
+              <p className="font-medium text-sm">Insights</p>
+              <p className="text-xs text-muted-foreground">Weekly stats</p>
+            </div>
+          </motion.div>
+        </Link>
+      </motion.div>
+
+      {/* Weight Card */}
+      {profile?.current_weight_kg && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Link href="/insights/weight" className="tap-highlight block">
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              className="bg-card rounded-2xl p-4 elevation-1"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                    <Scale className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold tracking-tight">
+                      {profile.current_weight_kg.toFixed(1)}
+                      <span className="text-sm font-normal text-muted-foreground ml-1">kg</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">Current weight</p>
+                  </div>
+                </div>
+                {profile.target_weight_kg && (
+                  <div className="text-right flex items-center gap-2">
+                    <div>
+                      <div className="flex items-center gap-1 text-primary">
+                        <TrendingDown className="h-4 w-4" />
+                        <span className="font-semibold text-sm">
+                          {Math.abs(profile.current_weight_kg - profile.target_weight_kg).toFixed(1)} kg
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">to goal</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </Link>
+        </motion.div>
+      )}
     </div>
   )
 }

@@ -3,59 +3,65 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 240 10% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 240 10% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.5rem;
+    --popover-foreground: 240 10% 10%;
+    --primary: 153 60% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 240 10% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 153 60% 45%;
+    --radius: 1rem;
 
-    /* Macro colors */
-    --protein: 0 84.2% 60.2%;
-    --carbs: 217.2 91.2% 59.8%;
-    --fat: 47.9 95.8% 53.1%;
+    /* Macro colors - vibrant but balanced */
+    --protein: 350 80% 60%;
+    --carbs: 220 85% 60%;
+    --fat: 45 93% 55%;
 
     /* Chart colors */
-    --chart-1: 142.1 76.2% 36.3%;
-    --chart-2: 217.2 91.2% 59.8%;
-    --chart-3: 47.9 95.8% 53.1%;
-    --chart-4: 0 84.2% 60.2%;
-    --chart-5: 262.1 83.3% 57.8%;
+    --chart-1: 153 60% 45%;
+    --chart-2: 220 85% 60%;
+    --chart-3: 45 93% 55%;
+    --chart-4: 350 80% 60%;
+    --chart-5: 280 70% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.1 70.6% 45.3%;
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 153 70% 50%;
+    --primary-foreground: 153 80% 10%;
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 240 5% 18%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 5% 18%;
+    --input: 240 5% 18%;
+    --ring: 153 70% 50%;
+
+    /* Elevated surfaces for depth */
+    --card-elevated: 240 6% 13%;
+    --surface-1: 240 6% 8%;
+    --surface-2: 240 6% 12%;
+    --surface-3: 240 6% 16%;
   }
 }
 
@@ -92,10 +98,11 @@
   --color-protein: hsl(var(--protein));
   --color-carbs: hsl(var(--carbs));
   --color-fat: hsl(var(--fat));
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
+  --radius-2xl: calc(var(--radius) + 16px);
 }
 
 /* Custom scrollbar */
@@ -156,4 +163,101 @@ input[type="number"] {
 
 .animate-scan {
   animation: scan 2s ease-in-out infinite;
+}
+
+/* Glass morphism utilities */
+.glass {
+  background: hsl(var(--card) / 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.glass-subtle {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Native-feel tap highlight */
+@media (hover: none) {
+  .tap-highlight {
+    -webkit-tap-highlight-color: hsl(var(--primary) / 0.1);
+  }
+
+  .tap-highlight:active {
+    opacity: 0.7;
+    transition: opacity 0.1s;
+  }
+}
+
+/* Smooth press animation for buttons */
+.press-scale {
+  transition: transform 0.1s ease-out;
+}
+
+.press-scale:active {
+  transform: scale(0.97);
+}
+
+/* Bottom safe area for navigation */
+.safe-area-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle glow for primary elements */
+.glow-primary {
+  box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+}
+
+/* Card depth levels */
+.elevation-1 {
+  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.1);
+}
+
+.elevation-2 {
+  box-shadow: 0 4px 6px hsl(0 0% 0% / 0.1), 0 2px 4px hsl(0 0% 0% / 0.06);
+}
+
+.elevation-3 {
+  box-shadow: 0 10px 15px hsl(0 0% 0% / 0.1), 0 4px 6px hsl(0 0% 0% / 0.05);
+}
+
+/* Dark mode specific shadows */
+.dark .elevation-1 {
+  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.4);
+}
+
+.dark .elevation-2 {
+  box-shadow: 0 4px 6px hsl(0 0% 0% / 0.4), 0 2px 4px hsl(0 0% 0% / 0.3);
+}
+
+.dark .elevation-3 {
+  box-shadow: 0 10px 15px hsl(0 0% 0% / 0.4), 0 4px 6px hsl(0 0% 0% / 0.3);
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ring progress gradient support */
+.ring-gradient {
+  stroke: url(#primaryGradient);
 }

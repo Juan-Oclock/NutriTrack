@@ -117,21 +117,21 @@ export default function DiaryPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-lg mx-auto">
-        <Skeleton className="h-[140px] w-full" />
-        <Skeleton className="h-[120px] w-full mt-2" />
-        <div className="p-4 space-y-4">
-          <Skeleton className="h-[120px] w-full rounded-xl" />
-          <Skeleton className="h-[120px] w-full rounded-xl" />
-          <Skeleton className="h-[120px] w-full rounded-xl" />
-          <Skeleton className="h-[120px] w-full rounded-xl" />
+      <div className="max-w-lg mx-auto pb-24">
+        <Skeleton className="h-[120px] w-full" />
+        <Skeleton className="h-[100px] w-full" />
+        <div className="p-4 space-y-3">
+          <Skeleton className="h-[100px] w-full rounded-2xl" />
+          <Skeleton className="h-[100px] w-full rounded-2xl" />
+          <Skeleton className="h-[100px] w-full rounded-2xl" />
+          <Skeleton className="h-[100px] w-full rounded-2xl" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto pb-24">
       <DateSelector
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
@@ -156,8 +156,8 @@ export default function DiaryPage() {
         }}
       />
 
-      <div className="p-4 space-y-4">
-        {mealTypes.map((mealType) => (
+      <div className="p-4 space-y-3">
+        {mealTypes.map((mealType, index) => (
           <MealSection
             key={mealType}
             mealType={mealType}
