@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity } from "lucide-react"
+import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 import {
   calculateAge,
@@ -159,10 +159,19 @@ export default function GoalsPage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-white">Set Your Goals</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center space-y-2"
+      >
+        <h1 className="text-2xl font-bold text-white">
+          Set your{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+            goals
+          </span>
+        </h1>
         <p className="text-slate-400">Tell us what you want to achieve</p>
-      </div>
+      </motion.div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Goal Type */}
@@ -173,25 +182,31 @@ export default function GoalsPage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <Target className="h-4 w-4 text-primary" />
-            What's your goal?
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+              <Target className="h-3.5 w-3.5 text-white" />
+            </div>
+            What&apos;s your goal?
           </Label>
           <div className="grid grid-cols-2 gap-3">
             {goalOptions.map((option) => (
-              <button
+              <motion.button
                 key={option.value}
                 type="button"
                 onClick={() => setGoalType(option.value as GoalType)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 className={`p-4 rounded-2xl border-2 text-left transition-all ${
                   goalType === option.value
-                    ? `${option.border} ${option.bg}`
+                    ? `${option.border} ${option.bg} shadow-lg`
                     : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
                 }`}
               >
-                <option.icon className={`h-6 w-6 mb-2 ${option.color}`} />
+                <div className={`h-10 w-10 rounded-xl ${option.bg} flex items-center justify-center mb-2`}>
+                  <option.icon className={`h-5 w-5 ${option.color}`} />
+                </div>
                 <p className="font-semibold text-white text-sm">{option.label}</p>
                 <p className="text-xs text-slate-400 mt-0.5">{option.description}</p>
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
@@ -204,25 +219,29 @@ export default function GoalsPage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <Activity className="h-4 w-4 text-primary" />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Activity className="h-3.5 w-3.5 text-white" />
+            </div>
             Activity Level
           </Label>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
             {activityOptions.map((option) => (
-              <button
+              <motion.button
                 key={option.value}
                 type="button"
                 onClick={() => setActivityLevel(option.value as ActivityLevel)}
-                className={`flex-shrink-0 p-3 rounded-xl border-2 text-center transition-all min-w-[80px] ${
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`flex-shrink-0 p-3 rounded-xl border-2 text-center transition-all min-w-[85px] ${
                   activityLevel === option.value
-                    ? "border-primary bg-primary/20"
+                    ? "border-primary bg-primary/20 shadow-lg shadow-primary/20"
                     : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
                 }`}
               >
                 <span className="text-2xl block mb-1">{option.icon}</span>
                 <p className="font-medium text-white text-xs">{option.label}</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">{option.description}</p>
-              </button>
+              </motion.button>
             ))}
           </div>
         </motion.div>
@@ -235,15 +254,19 @@ export default function GoalsPage() {
             className="space-y-4"
           >
             <Label className="flex items-center gap-2 text-white">
-              <Zap className="h-4 w-4 text-primary" />
+              <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                <Zap className="h-3.5 w-3.5 text-white" />
+              </div>
               Weekly Goal
             </Label>
-            <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700">
+            <div className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-slate-400 text-sm">Pace</span>
-                <span className="text-xl font-bold text-primary">
-                  {weeklyGoal[0]} kg/week
-                </span>
+                <div className="px-3 py-1.5 rounded-lg bg-primary/20 border border-primary/30">
+                  <span className="text-xl font-bold text-primary">
+                    {weeklyGoal[0]} kg/week
+                  </span>
+                </div>
               </div>
               <Slider
                 value={weeklyGoal}
@@ -253,7 +276,7 @@ export default function GoalsPage() {
                 step={0.25}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-slate-500 mt-2">
+              <div className="flex justify-between text-xs text-slate-500 mt-3">
                 <span>Gradual</span>
                 <span>Moderate</span>
                 <span>Aggressive</span>
@@ -299,14 +322,22 @@ export default function GoalsPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
+          className="pt-2"
         >
           <Button
             type="submit"
-            className="w-full h-12 rounded-xl text-base font-semibold"
+            size="lg"
+            className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
             disabled={isLoading || !goalType || !activityLevel}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Continue
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                Complete Setup
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </Button>
         </motion.div>
       </form>

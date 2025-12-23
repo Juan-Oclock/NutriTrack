@@ -1,13 +1,15 @@
 {
   "name": "CalorieCue - Calorie & Macro Tracker",
   "short_name": "CalorieCue",
-  "description": "Track calories, macros, and nutrition goals with AI-powered meal scanning",
+  "description": "Track calories, macros, and nutrition goals with AI-powered meal scanning. Scan barcodes, log meals, and achieve your fitness goals.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#22c55e",
   "orientation": "portrait",
   "scope": "/",
+  "id": "/",
+  "lang": "en-US",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",

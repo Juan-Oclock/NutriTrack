@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, User, Calendar, Ruler, Scale } from "lucide-react"
+import { Loader2, User, Calendar, Ruler, Scale, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 import { feetToCm, lbsToKg } from "@/lib/utils/nutrition"
 import { motion } from "framer-motion"
@@ -14,10 +14,10 @@ import { motion } from "framer-motion"
 type Gender = "male" | "female" | "other" | "prefer_not_to_say"
 
 const genderOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "other", label: "Other" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
+  { value: "male", label: "Male", icon: "♂️" },
+  { value: "female", label: "Female", icon: "♀️" },
+  { value: "other", label: "Other", icon: "⚧️" },
+  { value: "prefer_not_to_say", label: "Prefer not to say", icon: "🤐" },
 ]
 
 export default function ProfilePage() {
@@ -93,12 +93,21 @@ export default function ProfilePage() {
       className="space-y-6"
     >
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold text-white">Tell us about yourself</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center space-y-2"
+      >
+        <h1 className="text-2xl font-bold text-white">
+          Tell us about{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+            yourself
+          </span>
+        </h1>
         <p className="text-slate-400">
           This helps us calculate your personalized nutrition goals
         </p>
-      </div>
+      </motion.div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Gender Selection */}
@@ -109,7 +118,9 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <User className="h-4 w-4 text-primary" />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+              <User className="h-3.5 w-3.5 text-white" />
+            </div>
             Gender
           </Label>
           <div className="grid grid-cols-2 gap-2">
@@ -118,12 +129,13 @@ export default function ProfilePage() {
                 key={option.value}
                 type="button"
                 onClick={() => setGender(option.value as Gender)}
-                className={`p-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                className={`p-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center gap-2 ${
                   gender === option.value
-                    ? "border-primary bg-primary/20 text-primary"
+                    ? "border-primary bg-primary/20 text-white shadow-lg shadow-primary/20"
                     : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
                 }`}
               >
+                <span className="text-lg">{option.icon}</span>
                 {option.label}
               </button>
             ))}
@@ -138,7 +150,9 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <Calendar className="h-4 w-4 text-primary" />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+              <Calendar className="h-3.5 w-3.5 text-white" />
+            </div>
             Date of Birth
           </Label>
           <Input
@@ -147,7 +161,7 @@ export default function ProfilePage() {
             onChange={(e) => setDateOfBirth(e.target.value)}
             max={new Date().toISOString().split("T")[0]}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl"
+            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl focus:border-purple-500 focus:ring-purple-500/20"
           />
         </motion.div>
 
@@ -159,7 +173,9 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <Ruler className="h-4 w-4 text-primary" />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+              <Ruler className="h-3.5 w-3.5 text-white" />
+            </div>
             Height
           </Label>
 
@@ -170,7 +186,7 @@ export default function ProfilePage() {
               onClick={() => setHeightUnit("imperial")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 heightUnit === "imperial"
-                  ? "bg-primary text-white"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -181,7 +197,7 @@ export default function ProfilePage() {
               onClick={() => setHeightUnit("metric")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 heightUnit === "metric"
-                  ? "bg-primary text-white"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -240,7 +256,9 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <Scale className="h-4 w-4 text-primary" />
+            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Scale className="h-3.5 w-3.5 text-white" />
+            </div>
             Current Weight
           </Label>
 
@@ -251,7 +269,7 @@ export default function ProfilePage() {
               onClick={() => setWeightUnit("imperial")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 weightUnit === "imperial"
-                  ? "bg-primary text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -262,7 +280,7 @@ export default function ProfilePage() {
               onClick={() => setWeightUnit("metric")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 weightUnit === "metric"
-                  ? "bg-primary text-white"
+                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -308,14 +326,22 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="pt-2"
         >
           <Button
             type="submit"
-            className="w-full h-12 rounded-xl text-base font-semibold"
+            size="lg"
+            className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
             disabled={isLoading || !gender || !dateOfBirth}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Continue
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <>
+                Continue
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
           </Button>
         </motion.div>
       </form>

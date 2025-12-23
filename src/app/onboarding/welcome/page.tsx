@@ -2,39 +2,48 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Apple, BarChart3, Camera, Target, ArrowRight, Sparkles } from "lucide-react"
+import { Apple, BarChart3, Camera, Target, ArrowRight, Sparkles, Zap } from "lucide-react"
 import { motion } from "framer-motion"
 
 const features = [
   {
     icon: Apple,
-    title: "Track Your Meals",
+    title: "Track Meals",
     description: "Log food with our extensive database",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/20",
+    gradient: "from-emerald-500 to-green-600",
   },
   {
     icon: Camera,
     title: "Scan & Log",
     description: "Barcode scanning & AI recognition",
-    color: "text-blue-400",
-    bg: "bg-blue-500/20",
+    gradient: "from-blue-500 to-indigo-600",
   },
   {
     icon: Target,
     title: "Set Goals",
     description: "Personalized calorie & macro targets",
-    color: "text-orange-400",
-    bg: "bg-orange-500/20",
+    gradient: "from-orange-500 to-red-500",
   },
   {
     icon: BarChart3,
     title: "View Insights",
     description: "Track progress with detailed reports",
-    color: "text-purple-400",
-    bg: "bg-purple-500/20",
+    gradient: "from-purple-500 to-pink-500",
   },
 ]
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  }
+}
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+}
 
 export default function WelcomePage() {
   const router = useRouter()
@@ -48,41 +57,67 @@ export default function WelcomePage() {
         className="text-center space-y-4"
       >
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
           className="flex justify-center mb-6"
         >
-          <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/25">
-            <Sparkles className="h-10 w-10 text-white" />
+          <div className="relative">
+            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-2xl shadow-primary/30">
+              <Sparkles className="h-12 w-12 text-white" />
+            </div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.4 }}
+              className="absolute -right-2 -top-2 h-8 w-8 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg"
+            >
+              <Zap className="h-4 w-4 text-white" />
+            </motion.div>
           </div>
         </motion.div>
 
-        <h1 className="text-3xl font-bold tracking-tight text-white">
-          Welcome to CalorieCue
-        </h1>
-        <p className="text-slate-400 text-lg max-w-md mx-auto">
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-3xl font-bold tracking-tight text-white"
+        >
+          Welcome to{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+            CalorieCue
+          </span>
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-slate-400 text-lg max-w-md mx-auto leading-relaxed"
+        >
           Your personal nutrition companion for achieving your health and fitness goals
-        </p>
+        </motion.p>
       </motion.div>
 
       {/* Features Grid */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
+        variants={container}
+        initial="hidden"
+        animate="show"
         className="grid grid-cols-2 gap-3"
       >
-        {features.map((feature, index) => (
+        {features.map((feature) => (
           <motion.div
             key={feature.title}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 + index * 0.05 }}
-            className="p-4 rounded-2xl bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 transition-colors"
+            variants={item}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="relative p-4 rounded-2xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 hover:border-slate-600 transition-all duration-300 overflow-hidden group"
           >
-            <div className={`h-10 w-10 rounded-xl ${feature.bg} flex items-center justify-center mb-3`}>
-              <feature.icon className={`h-5 w-5 ${feature.color}`} />
+            {/* Gradient glow on hover */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+
+            <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-3 shadow-lg`}>
+              <feature.icon className="h-5 w-5 text-white" />
             </div>
             <h3 className="font-semibold text-white text-sm mb-1">{feature.title}</h3>
             <p className="text-xs text-slate-400 leading-relaxed">{feature.description}</p>
@@ -90,16 +125,35 @@ export default function WelcomePage() {
         ))}
       </motion.div>
 
+      {/* Stats */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="flex justify-center gap-8 py-4"
+      >
+        {[
+          { value: "500K+", label: "Foods" },
+          { value: "AI", label: "Powered" },
+          { value: "Free", label: "Forever" },
+        ].map((stat) => (
+          <div key={stat.label} className="text-center">
+            <div className="text-xl font-bold text-white">{stat.value}</div>
+            <div className="text-xs text-slate-500">{stat.label}</div>
+          </div>
+        ))}
+      </motion.div>
+
       {/* CTA Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="space-y-3 pt-4"
+        transition={{ delay: 0.6 }}
+        className="space-y-4 pt-2"
       >
         <Button
           size="lg"
-          className="w-full h-14 rounded-xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 group"
+          className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
           onClick={() => router.push("/onboarding/profile")}
         >
           Get Started

@@ -11,8 +11,16 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "CalorieCue - Calorie & Macro Tracker",
-  description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://caloriecue.vercel.app"),
+  title: {
+    default: "CalorieCue - Calorie & Macro Tracker",
+    template: "%s | CalorieCue",
+  },
+  description: "Track calories, macros, and nutrition goals with AI-powered meal scanning. Scan barcodes, log meals, and achieve your fitness goals with 500K+ foods database.",
+  keywords: ["calorie tracker", "macro tracker", "nutrition app", "meal scanner", "food diary", "fitness app", "diet tracker", "barcode scanner", "AI meal recognition"],
+  authors: [{ name: "CalorieCue" }],
+  creator: "CalorieCue",
+  publisher: "CalorieCue",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -26,12 +34,34 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "CalorieCue",
     title: "CalorieCue - Calorie & Macro Tracker",
-    description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
+    description: "Track calories, macros, and nutrition goals with AI-powered meal scanning. Scan barcodes, log meals, and achieve your fitness goals.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "CalorieCue - Your personal nutrition companion",
+      },
+    ],
+    locale: "en_US",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "CalorieCue - Calorie & Macro Tracker",
-    description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
+    description: "Track calories, macros, and nutrition goals with AI-powered meal scanning. 500K+ foods database.",
+    images: ["/og-image.png"],
+    creator: "@caloriecue",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 }
 
