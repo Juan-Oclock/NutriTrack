@@ -163,7 +163,7 @@ export default function SupportPage() {
                 className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90"
                 asChild
               >
-                <a href="mailto:support@caloriecue.app">
+                <a href="mailto:onelasttimejuan@gmail.com">
                   <Mail className="mr-2 h-5 w-5" />
                   Email Support
                 </a>

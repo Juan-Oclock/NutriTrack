@@ -36,9 +36,9 @@ const menuItems = [
 ]
 
 const supportItems = [
-  { href: "/help", icon: HelpCircle, label: "Help & Support" },
-  { href: "/privacy", icon: Shield, label: "Privacy Policy" },
-  { href: "/terms", icon: FileText, label: "Terms of Service" },
+  { href: "mailto:onelasttimejuan@gmail.com", icon: HelpCircle, label: "Help & Support", external: true },
+  { href: "/privacy", icon: Shield, label: "Privacy Policy", external: false },
+  { href: "/terms", icon: FileText, label: "Terms of Service", external: false },
 ]
 
 const themeOptions = [
@@ -233,8 +233,8 @@ export default function ProfilePage() {
           <div className="px-4 py-3 border-b border-border/50">
             <p className="text-xs text-muted-foreground uppercase tracking-wide">Support</p>
           </div>
-          {supportItems.map((item, index) => (
-            <Link key={item.href} href={item.href}>
+          {supportItems.map((item, index) => {
+            const content = (
               <motion.div
                 whileTap={{ scale: 0.98 }}
                 className={cn(
@@ -248,8 +248,18 @@ export default function ProfilePage() {
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </motion.div>
-            </Link>
-          ))}
+            )
+
+            return item.external ? (
+              <a key={item.href} href={item.href}>
+                {content}
+              </a>
+            ) : (
+              <Link key={item.href} href={item.href}>
+                {content}
+              </Link>
+            )
+          })}
         </motion.div>
 
         {/* Sign Out */}
