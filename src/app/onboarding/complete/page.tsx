@@ -44,6 +44,19 @@ export default function CompletePage() {
   const [isIOS, setIsIOS] = useState(false)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
 
+  // Send welcome email on mount
+  useEffect(() => {
+    const sendWelcomeEmail = async () => {
+      try {
+        await fetch("/api/emails/welcome", { method: "POST" })
+      } catch (error) {
+        // Silently fail - email is not critical
+        console.error("Failed to send welcome email:", error)
+      }
+    }
+    sendWelcomeEmail()
+  }, [])
+
   // Confetti animation
   useEffect(() => {
     const end = Date.now() + 2000
