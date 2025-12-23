@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { Webhook } from "standardwebhooks"
 import { resend, EMAIL_FROM, isResendConfigured } from "@/lib/resend"
 import VerificationEmail from "@/emails/verification-email"
 import PasswordResetEmail from "@/emails/password-reset-email"
@@ -24,19 +25,6 @@ interface AuthHookPayload {
   }
 }
 
-// Verify the webhook is from Supabase using the secret
-function verifyWebhookSecret(request: NextRequest): boolean {
-  const authHeader = request.headers.get("authorization")
-  const webhookSecret = process.env.SUPABASE_AUTH_HOOK_SECRET
-
-  if (!webhookSecret) {
-    console.error("SUPABASE_AUTH_HOOK_SECRET is not configured")
-    return false
-  }
-
-  return authHeader === `Bearer ${webhookSecret}`
-}
-
 export async function POST(request: NextRequest) {
   try {
     // Check if Resend is configured
@@ -45,12 +33,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, skipped: true })
     }
 
-    // Verify the webhook secret
-    if (!verifyWebhookSecret(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    // Verify the webhook signature using Standard Webhooks
+    const webhookSecret = process.env.SUPABASE_AUTH_HOOK_SECRET
+    if (!webhookSecret) {
+      console.error("SUPABASE_AUTH_HOOK_SECRET is not configured")
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
     }
 
-    const payload: AuthHookPayload = await request.json()
+    // Extract the base64 secret (remove 'v1,whsec_' prefix)
+    const base64Secret = webhookSecret.replace("v1,whsec_", "")
+    const wh = new Webhook(base64Secret)
+
+    // Get the raw body and headers for verification
+    const body = await request.text()
+    const headers: Record<string, string> = {}
+    request.headers.forEach((value, key) => {
+      headers[key] = value
+    })
+
+    let payload: AuthHookPayload
+    try {
+      payload = wh.verify(body, headers) as AuthHookPayload
+    } catch (err) {
+      console.error("Webhook verification failed:", err)
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 })
+    }
+
     const { type, user, email_data } = payload
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
