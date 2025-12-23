@@ -16,9 +16,8 @@ export async function OPTIONS() {
   })
 }
 
-// Supabase Auth Hook types
+// Supabase Auth Hook types - payload structure from Send Email Hook
 interface AuthHookPayload {
-  type: "signup" | "recovery" | "invite" | "magiclink" | "email_change" | "reauthentication"
   user: {
     id: string
     email: string
@@ -30,7 +29,7 @@ interface AuthHookPayload {
     token: string
     token_hash: string
     redirect_to: string
-    email_action_type: string
+    email_action_type: "signup" | "recovery" | "invite" | "magiclink" | "email_change" | "reauthentication"
     site_url: string
     token_new?: string
     token_hash_new?: string
@@ -73,7 +72,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 })
     }
 
-    const { type, user, email_data } = payload
+    const { user, email_data } = payload
+    const type = email_data.email_action_type
     console.log("Processing email hook - type:", type, "user:", user?.email)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
@@ -166,6 +166,10 @@ export async function POST(request: NextRequest) {
         { error: "Failed to send email" },
         { status: 500 }
       )
+    }
+
+    if (emailResult?.data) {
+      console.log("Email sent successfully:", emailResult.data)
     }
 
     return NextResponse.json({ success: true })
