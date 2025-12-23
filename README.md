@@ -7,7 +7,7 @@ A modern nutrition tracking app built with Next.js 16, Supabase, and AI-powered 
 - User authentication with Supabase Auth
 - Food diary with meal logging (breakfast, lunch, dinner, snacks)
 - Barcode scanning for packaged foods (Open Food Facts API)
-- AI-powered meal scanning with DeepSeek API
+- AI-powered meal scanning with Google Gemini (free tier)
 - Personalized nutrition goals based on user profile
 - Progress tracking and insights
 - Dark mode UI with modern design
@@ -20,7 +20,7 @@ A modern nutrition tracking app built with Next.js 16, Supabase, and AI-powered 
 - **Styling**: Tailwind CSS v4
 - **UI Components**: shadcn/ui + Radix UI
 - **Animations**: Framer Motion
-- **AI**: DeepSeek API for meal image analysis
+- **AI**: Google Gemini (primary) + LogMeal API (fallback) for meal scanning
 - **Food Data**: Open Food Facts API
 
 ## Getting Started
@@ -30,7 +30,8 @@ A modern nutrition tracking app built with Next.js 16, Supabase, and AI-powered 
 - Node.js 18+
 - npm or yarn
 - Supabase account
-- DeepSeek API key (optional, for AI meal scanning)
+- Google Gemini API key (free, for AI meal scanning)
+- LogMeal API key (optional fallback)
 
 ### Installation
 
@@ -54,7 +55,8 @@ cp .env.example .env.local
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-DEEPSEEK_API_KEY=your_deepseek_api_key  # Optional
+GOOGLE_GEMINI_API_KEY=your_gemini_key    # Free at https://aistudio.google.com/apikey
+LOGMEAL_API_KEY=your_logmeal_key         # Optional fallback
 ```
 
 5. Run the development server:
@@ -85,7 +87,8 @@ Run the migrations in your Supabase project:
 3. Add the following environment variables in Vercel:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `DEEPSEEK_API_KEY` (optional)
+   - `GOOGLE_GEMINI_API_KEY` (free)
+   - `LOGMEAL_API_KEY` (optional fallback)
 
 4. Deploy!
 
@@ -95,8 +98,11 @@ Run the migrations in your Supabase project:
 |----------|----------|-------------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Your Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous/public key |
-| `DEEPSEEK_API_KEY` | No | DeepSeek API key for AI meal scanning |
+| `GOOGLE_GEMINI_API_KEY` | Yes* | Google Gemini API key ([free](https://aistudio.google.com/apikey)) |
+| `LOGMEAL_API_KEY` | No | LogMeal API key for fallback ([free](https://logmeal.com/api/)) |
 | `NEXT_PUBLIC_APP_URL` | No | App URL (defaults to Vercel URL) |
+
+*Required for AI meal scanning feature. The app works without it but meal photo analysis will be disabled.
 
 ## Project Structure
 
