@@ -4,6 +4,18 @@ import { resend, EMAIL_FROM, isResendConfigured } from "@/lib/resend"
 import VerificationEmail from "@/emails/verification-email"
 import PasswordResetEmail from "@/emails/password-reset-email"
 
+// Handle CORS preflight requests
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, webhook-id, webhook-timestamp, webhook-signature",
+    },
+  })
+}
+
 // Supabase Auth Hook types
 interface AuthHookPayload {
   type: "signup" | "recovery" | "invite" | "magiclink" | "email_change" | "reauthentication"
