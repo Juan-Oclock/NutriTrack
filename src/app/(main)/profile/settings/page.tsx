@@ -316,15 +316,15 @@ export default function SettingsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4"
+              className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4"
               onClick={() => setShowIOSInstructions(false)}
             >
               <motion.div
-                initial={{ y: 100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 100, opacity: 0 }}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-card w-full max-w-md rounded-2xl p-6 space-y-4"
+                className="bg-card w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl"
               >
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Install CalorieCue</h3>
