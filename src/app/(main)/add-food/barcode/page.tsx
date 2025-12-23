@@ -205,23 +205,6 @@ function BarcodeContent() {
       setCameraError(null)
       setLastScannedCode(null)
 
-      // First, get the camera stream manually for better mobile compatibility
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      })
-
-      // Attach stream to video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-      }
-
-      setIsScanning(true)
-
       // Configure barcode reader for common product barcodes
       const hints = new Map()
       hints.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -237,8 +220,20 @@ function BarcodeContent() {
       const reader = new BrowserMultiFormatReader(hints)
       readerRef.current = reader
 
-      // Start continuous scanning from the video element
-      const controls = await reader.decodeFromVideoElement(
+      // Use decodeFromConstraints for continuous scanning with custom video constraints
+      const constraints: MediaStreamConstraints = {
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      }
+
+      setIsScanning(true)
+
+      // Start continuous scanning - this handles video setup internally
+      const controls = await reader.decodeFromConstraints(
+        constraints,
         videoRef.current!,
         (result, error) => {
           if (result) {
