@@ -202,9 +202,25 @@ function BarcodeContent() {
         return
       }
 
-      setIsScanning(true)
       setCameraError(null)
       setLastScannedCode(null)
+
+      // First, get the camera stream manually for better mobile compatibility
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+      })
+
+      // Attach stream to video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+
+      setIsScanning(true)
 
       // Configure barcode reader for common product barcodes
       const hints = new Map()
@@ -221,9 +237,8 @@ function BarcodeContent() {
       const reader = new BrowserMultiFormatReader(hints)
       readerRef.current = reader
 
-      // Start continuous scanning
-      const controls = await reader.decodeFromVideoDevice(
-        undefined, // Use default camera (environment-facing on mobile)
+      // Start continuous scanning from the video element
+      const controls = await reader.decodeFromVideoElement(
         videoRef.current!,
         (result, error) => {
           if (result) {
@@ -239,6 +254,12 @@ function BarcodeContent() {
     } catch (err) {
       console.error("Camera error:", err)
       setIsScanning(false)
+      // Clean up any partial stream
+      if (videoRef.current?.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream
+        stream.getTracks().forEach((track) => track.stop())
+        videoRef.current.srcObject = null
+      }
       if (err instanceof Error && err.name === "NotAllowedError") {
         setCameraError("Camera permission denied. Please allow camera access and try again.")
       } else {
