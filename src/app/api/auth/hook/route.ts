@@ -35,15 +35,20 @@ interface AuthHookPayload {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("=== Auth Hook POST started ===")
+
   try {
     // Check if Resend is configured
+    console.log("Checking Resend configuration...")
     if (!isResendConfigured()) {
       console.warn("Resend is not configured. Auth hook will not send emails.")
       return NextResponse.json({ success: true, skipped: true })
     }
+    console.log("Resend is configured")
 
     // Verify the webhook signature using Standard Webhooks
     const webhookSecret = process.env.SUPABASE_AUTH_HOOK_SECRET
+    console.log("Webhook secret exists:", !!webhookSecret)
     if (!webhookSecret) {
       console.error("SUPABASE_AUTH_HOOK_SECRET is not configured")
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 })
@@ -51,18 +56,26 @@ export async function POST(request: NextRequest) {
 
     // Extract the base64 secret (remove 'v1,whsec_' prefix)
     const base64Secret = webhookSecret.replace("v1,whsec_", "")
+    console.log("Creating Webhook instance...")
     const wh = new Webhook(base64Secret)
+    console.log("Webhook instance created")
 
     // Get the raw body and headers for verification
+    console.log("Reading request body...")
     const body = await request.text()
+    console.log("Request body length:", body.length)
+
     const headers: Record<string, string> = {}
     request.headers.forEach((value, key) => {
       headers[key] = value
     })
+    console.log("Headers collected:", Object.keys(headers).join(", "))
 
     let payload: AuthHookPayload
     try {
+      console.log("Verifying webhook signature...")
       const verified = wh.verify(body, headers)
+      console.log("Webhook verified successfully")
       console.log("Auth hook payload received:", JSON.stringify(verified, null, 2))
       payload = verified as AuthHookPayload
     } catch (err) {
