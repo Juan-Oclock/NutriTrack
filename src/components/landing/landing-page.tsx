@@ -35,7 +35,7 @@ export function LandingPage() {
               <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl text-foreground">NutriTrack</span>
+              <span className="font-bold text-xl text-foreground">CalorieCue</span>
             </Link>
 
             {/* Desktop nav */}
@@ -141,7 +141,7 @@ export function LandingPage() {
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
                   <Leaf className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-semibold text-foreground">NutriTrack</span>
+                <span className="font-semibold text-foreground">CalorieCue</span>
               </div>
 
               {/* Links */}
@@ -159,7 +159,7 @@ export function LandingPage() {
 
               {/* Copyright */}
               <p className="text-sm text-muted-foreground">
-                {new Date().getFullYear()} NutriTrack. All rights reserved.
+                {new Date().getFullYear()} CalorieCue. All rights reserved.
               </p>
             </div>
 

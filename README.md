@@ -1,4 +1,4 @@
-# NutriTrack
+# CalorieCue
 
 A modern nutrition tracking app built with Next.js 16, Supabase, and AI-powered meal scanning.
 

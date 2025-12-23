@@ -1,4 +1,4 @@
--- Seed data for NutriTrack
+-- Seed data for CalorieCue
 -- Common foods database
 
 INSERT INTO foods (name, brand, serving_size, serving_unit, calories, protein_g, carbs_g, fat_g, fiber_g, sugar_g, sodium_mg, is_verified) VALUES

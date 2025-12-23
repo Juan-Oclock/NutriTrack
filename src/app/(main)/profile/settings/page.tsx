@@ -209,7 +209,7 @@ export default function SettingsPage() {
           <SettingRow
             icon={Smartphone}
             label="App Version"
-            description="NutriTrack v1.0.0"
+            description="CalorieCue v1.0.0"
             action={<span className="text-sm text-muted-foreground">Up to date</span>}
             border
           />

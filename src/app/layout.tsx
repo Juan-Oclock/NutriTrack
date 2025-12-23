@@ -10,26 +10,26 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "NutriTrack - Calorie & Macro Tracker",
+  title: "CalorieCue - Calorie & Macro Tracker",
   description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "NutriTrack",
+    title: "CalorieCue",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "NutriTrack",
-    title: "NutriTrack - Calorie & Macro Tracker",
+    siteName: "CalorieCue",
+    title: "CalorieCue - Calorie & Macro Tracker",
     description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
   },
   twitter: {
     card: "summary",
-    title: "NutriTrack - Calorie & Macro Tracker",
+    title: "CalorieCue - Calorie & Macro Tracker",
     description: "Track calories, macros, and nutrition goals with AI-powered meal scanning",
   },
 }

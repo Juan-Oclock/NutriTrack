@@ -15,7 +15,7 @@ export function VerifiedBadge({ className, showTooltip = false }: VerifiedBadgeP
         "inline-flex items-center justify-center",
         className
       )}
-      title={showTooltip ? "Verified by NutriTrack" : undefined}
+      title={showTooltip ? "Verified by CalorieCue" : undefined}
     >
       <ShieldCheck className="h-4 w-4 text-emerald-500" />
     </div>

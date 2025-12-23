@@ -59,7 +59,7 @@ export default function WelcomePage() {
         </motion.div>
 
         <h1 className="text-3xl font-bold tracking-tight text-white">
-          Welcome to NutriTrack
+          Welcome to CalorieCue
         </h1>
         <p className="text-slate-400 text-lg max-w-md mx-auto">
           Your personal nutrition companion for achieving your health and fitness goals

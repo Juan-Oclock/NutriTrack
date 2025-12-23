@@ -33,7 +33,7 @@ const contactOptions = [
     icon: Mail,
     label: "Email Support",
     description: "Get help within 24 hours",
-    action: "support@nutritrack.app",
+    action: "support@caloriecue.app",
     color: "from-blue-500 to-blue-600",
   },
   {
@@ -131,7 +131,7 @@ export default function HelpPage() {
           transition={{ delay: 0.2 }}
           className="text-center pt-4"
         >
-          <p className="text-sm text-muted-foreground">NutriTrack v1.0.0</p>
+          <p className="text-sm text-muted-foreground">CalorieCue v1.0.0</p>
           <p className="text-xs text-muted-foreground mt-1">
             Made with care for your health journey
           </p>

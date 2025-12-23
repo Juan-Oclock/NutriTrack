@@ -116,10 +116,10 @@ export default function PrivacyPage() {
             Questions about your privacy?
           </p>
           <a
-            href="mailto:privacy@nutritrack.app"
+            href="mailto:privacy@caloriecue.app"
             className="text-primary font-medium"
           >
-            privacy@nutritrack.app
+            privacy@caloriecue.app
           </a>
         </motion.div>
       </div>

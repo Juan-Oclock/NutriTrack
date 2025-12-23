@@ -266,7 +266,7 @@ export default function ProfilePage() {
         </motion.button>
 
         <p className="text-center text-xs text-muted-foreground pt-2">
-          NutriTrack v1.0.0
+          CalorieCue v1.0.0
         </p>
       </div>
     </div>

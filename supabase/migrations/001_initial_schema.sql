@@ -1,4 +1,4 @@
--- NutriTrack Database Schema
+-- CalorieCue Database Schema
 -- Initial migration
 
 -- Users profile (extends Supabase auth.users)

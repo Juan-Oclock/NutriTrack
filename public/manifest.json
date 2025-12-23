@@ -1,6 +1,6 @@
 {
-  "name": "NutriTrack - Calorie & Macro Tracker",
-  "short_name": "NutriTrack",
+  "name": "CalorieCue - Calorie & Macro Tracker",
+  "short_name": "CalorieCue",
   "description": "Track calories, macros, and nutrition goals with AI-powered meal scanning",
   "start_url": "/dashboard",
   "display": "standalone",

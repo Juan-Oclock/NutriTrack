@@ -94,7 +94,7 @@ export default function RegisterPage() {
         </div>
         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
         <CardDescription>
-          Start your nutrition journey with NutriTrack
+          Start your nutrition journey with CalorieCue
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

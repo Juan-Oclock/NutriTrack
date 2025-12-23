@@ -10,7 +10,7 @@ const supportOptions = [
   {
     icon: FileQuestion,
     title: "FAQ",
-    description: "Find answers to commonly asked questions about NutriTrack.",
+    description: "Find answers to commonly asked questions about CalorieCue.",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
@@ -31,7 +31,7 @@ const supportOptions = [
   {
     icon: MessageSquare,
     title: "Feature Request",
-    description: "Have an idea to make NutriTrack better? We'd love to hear it.",
+    description: "Have an idea to make CalorieCue better? We'd love to hear it.",
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
   },
@@ -59,8 +59,8 @@ const faqs = [
     answer: "You can delete your account from Profile > Settings > Delete Account. This will permanently remove all your data from our servers."
   },
   {
-    question: "Does NutriTrack work offline?",
-    answer: "Yes, NutriTrack works offline for viewing your recent entries. However, you'll need an internet connection to search for new foods or sync your data."
+    question: "Does CalorieCue work offline?",
+    answer: "Yes, CalorieCue works offline for viewing your recent entries. However, you'll need an internet connection to search for new foods or sync your data."
   },
 ]
 
@@ -75,7 +75,7 @@ export default function SupportPage() {
               <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-xl text-foreground">NutriTrack</span>
+              <span className="font-bold text-xl text-foreground">CalorieCue</span>
             </Link>
             <Link href="/">
               <Button variant="ghost" size="sm">
@@ -101,7 +101,7 @@ export default function SupportPage() {
             </div>
             <h1 className="text-4xl font-bold text-foreground">Support Center</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Need help with NutriTrack? We&apos;re here to assist you on your nutrition journey.
+              Need help with CalorieCue? We&apos;re here to assist you on your nutrition journey.
             </p>
           </div>
 
@@ -163,7 +163,7 @@ export default function SupportPage() {
                 className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90"
                 asChild
               >
-                <a href="mailto:support@nutritrack.app">
+                <a href="mailto:support@caloriecue.app">
                   <Mail className="mr-2 h-5 w-5" />
                   Email Support
                 </a>

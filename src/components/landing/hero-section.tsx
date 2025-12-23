@@ -43,7 +43,7 @@ export function HeroSection() {
               <div className="h-6 w-6 rounded-md bg-primary flex items-center justify-center">
                 <Leaf className="h-4 w-4 text-white" />
               </div>
-              <span className="text-sm font-medium text-primary">NutriTrack</span>
+              <span className="text-sm font-medium text-primary">CalorieCue</span>
             </motion.div>
 
             {/* Headline */}
@@ -132,7 +132,7 @@ export function HeroSection() {
               {/* Main phone */}
               <PhoneMockup
                 variant="dashboard"
-                alt="NutriTrack Dashboard"
+                alt="CalorieCue Dashboard"
                 className="relative z-10"
               />
 
@@ -146,7 +146,7 @@ export function HeroSection() {
                 <div className="scale-90 opacity-60">
                   <PhoneMockup
                     variant="diary"
-                    alt="NutriTrack Food Diary"
+                    alt="CalorieCue Food Diary"
                   />
                 </div>
               </motion.div>

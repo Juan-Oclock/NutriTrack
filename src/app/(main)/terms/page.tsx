@@ -8,7 +8,7 @@ const sections = [
   {
     icon: CheckCircle,
     title: "Acceptance of Terms",
-    content: `By using NutriTrack, you agree to these terms:
+    content: `By using CalorieCue, you agree to these terms:
 • You must be at least 13 years old
 • You are responsible for your account security
 • You agree to provide accurate information
@@ -17,7 +17,7 @@ const sections = [
   {
     icon: FileText,
     title: "Use of Service",
-    content: `NutriTrack is provided for personal use:
+    content: `CalorieCue is provided for personal use:
 • Track nutrition and fitness goals
 • Access food database and logging features
 • Use AI-powered meal recognition
@@ -33,7 +33,7 @@ You may not:
     icon: AlertCircle,
     title: "Health Disclaimer",
     content: `Important health information:
-• NutriTrack is not medical advice
+• CalorieCue is not medical advice
 • Consult healthcare providers for health decisions
 • Calorie calculations are estimates only
 • We are not liable for health outcomes
@@ -43,7 +43,7 @@ You may not:
     icon: Scale,
     title: "Intellectual Property",
     content: `Our content is protected:
-• NutriTrack brand and logo are trademarks
+• CalorieCue brand and logo are trademarks
 • App design and code are copyrighted
 • Food database content is proprietary
 • User-generated content remains yours
@@ -125,10 +125,10 @@ export default function TermsPage() {
             Questions about these terms?
           </p>
           <a
-            href="mailto:legal@nutritrack.app"
+            href="mailto:legal@caloriecue.app"
             className="text-primary font-medium"
           >
-            legal@nutritrack.app
+            legal@caloriecue.app
           </a>
         </motion.div>
       </div>

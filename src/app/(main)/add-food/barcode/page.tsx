@@ -64,7 +64,7 @@ function BarcodeContent() {
         `https://world.openfoodfacts.org/api/v2/product/${barcode}`,
         {
           headers: {
-            "User-Agent": "NutriTrack/1.0",
+            "User-Agent": "CalorieCue/1.0",
           },
         }
       )

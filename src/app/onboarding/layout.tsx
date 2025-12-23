@@ -33,7 +33,7 @@ export default function OnboardingLayout({
           <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
             <Leaf className="h-5 w-5 text-white" />
           </div>
-          <span className="ml-2 text-xl font-bold text-white">NutriTrack</span>
+          <span className="ml-2 text-xl font-bold text-white">CalorieCue</span>
         </motion.div>
 
         {/* Progress Steps */}

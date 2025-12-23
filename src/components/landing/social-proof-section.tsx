@@ -16,7 +16,7 @@ const testimonials = [
   {
     name: "Sarah M.",
     role: "Lost 15 lbs in 3 months",
-    quote: "NutriTrack made calorie counting actually enjoyable. The barcode scanner saves me so much time, and I love seeing my progress in those beautiful charts!",
+    quote: "CalorieCue made calorie counting actually enjoyable. The barcode scanner saves me so much time, and I love seeing my progress in those beautiful charts!",
     rating: 5,
   },
   {
@@ -145,7 +145,7 @@ export function SocialProofSection() {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            See what our users have to say about their experience with NutriTrack.
+            See what our users have to say about their experience with CalorieCue.
           </p>
         </motion.div>
 
