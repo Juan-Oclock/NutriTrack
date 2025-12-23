@@ -23,7 +23,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -31,6 +31,24 @@ export default function LoginPage() {
       if (error) {
         toast.error(error.message)
         return
+      }
+
+      // Check if user has completed onboarding
+      if (data.user) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("goal_type, height_cm, current_weight_kg")
+          .eq("id", data.user.id)
+          .single()
+
+        // If profile is incomplete, redirect to onboarding
+        const profile = profileData as { goal_type: string | null; height_cm: number | null; current_weight_kg: number | null } | null
+        if (!profile?.goal_type || !profile?.height_cm || !profile?.current_weight_kg) {
+          toast.success("Let's finish setting up your profile!")
+          router.push("/onboarding/welcome")
+          router.refresh()
+          return
+        }
       }
 
       toast.success("Welcome back!")
