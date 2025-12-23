@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, ScanBarcode, Camera, AlertCircle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
-import { BarcodeFormat, DecodeHintType, BrowserMultiFormatReader } from "@zxing/library"
+import { Html5Qrcode } from "html5-qrcode"
 import type { Food, InsertTables } from "@/types/database"
 
 function BarcodeContent() {
@@ -26,13 +26,10 @@ function BarcodeContent() {
   const [error, setError] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
-  const scanningRef = useRef<boolean>(false)
-  const streamRef = useRef<MediaStream | null>(null)
+  const scannerRef = useRef<Html5Qrcode | null>(null)
   const supabase = createClient()
 
-  const lookupBarcode = async (barcode: string) => {
+  const lookupBarcode = useCallback(async (barcode: string) => {
     setIsLookingUp(true)
     setError(null)
     setFoundFood(null)
@@ -125,7 +122,7 @@ function BarcodeContent() {
     } finally {
       setIsLookingUp(false)
     }
-  }
+  }, [supabase])
 
   const handleManualLookup = () => {
     if (manualBarcode.length >= 8) {
@@ -182,26 +179,7 @@ function BarcodeContent() {
 
     // Auto-lookup the barcode
     await lookupBarcode(barcode)
-  }, [lastScannedCode, isLookingUp])
-
-  const scanLoop = useCallback(async () => {
-    if (!scanningRef.current || !videoRef.current || !readerRef.current) return
-
-    try {
-      const result = await readerRef.current.decodeFromVideoElement(videoRef.current)
-      if (result) {
-        const barcode = result.getText()
-        handleBarcodeDetected(barcode)
-      }
-    } catch {
-      // No barcode found in this frame - this is normal
-    }
-
-    // Continue scanning after a short delay
-    if (scanningRef.current) {
-      setTimeout(() => scanLoop(), 100)
-    }
-  }, [handleBarcodeDetected])
+  }, [lastScannedCode, isLookingUp, lookupBarcode])
 
   const startScanning = async () => {
     try {
@@ -223,86 +201,35 @@ function BarcodeContent() {
 
       setCameraError(null)
       setLastScannedCode(null)
-
-      // Get camera stream manually
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      })
-
-      streamRef.current = stream
-
-      // Attach stream to video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-
-        // Wait for video to be ready and playing
-        await new Promise<void>((resolve, reject) => {
-          const video = videoRef.current
-          if (!video) {
-            reject(new Error("Video element not found"))
-            return
-          }
-
-          const onCanPlay = () => {
-            video.removeEventListener("canplay", onCanPlay)
-            video.play()
-              .then(() => {
-                console.log("Video playing, dimensions:", video.videoWidth, "x", video.videoHeight)
-                resolve()
-              })
-              .catch(reject)
-          }
-
-          // If video is already ready, play immediately
-          if (video.readyState >= 3) {
-            onCanPlay()
-          } else {
-            video.addEventListener("canplay", onCanPlay)
-          }
-        })
-      }
-
-      // Configure barcode reader
-      const hints = new Map()
-      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-        BarcodeFormat.EAN_13,
-        BarcodeFormat.EAN_8,
-        BarcodeFormat.UPC_A,
-        BarcodeFormat.UPC_E,
-        BarcodeFormat.CODE_128,
-        BarcodeFormat.CODE_39,
-      ])
-      hints.set(DecodeHintType.TRY_HARDER, true)
-
-      const reader = new BrowserMultiFormatReader(hints)
-      readerRef.current = reader
-
       setIsScanning(true)
-      scanningRef.current = true
 
-      // Start scan loop
+      // Create scanner instance
+      const scanner = new Html5Qrcode("barcode-scanner")
+      scannerRef.current = scanner
+
+      // Start scanning
+      await scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 150 },
+          aspectRatio: 4 / 3,
+        },
+        (decodedText) => {
+          // On successful scan
+          handleBarcodeDetected(decodedText)
+        },
+        () => {
+          // QR code not found in frame - this is normal, no action needed
+        }
+      )
+
       toast.info("Point camera at a barcode to scan")
-      scanLoop()
     } catch (err) {
       console.error("Camera error:", err)
       setIsScanning(false)
-      scanningRef.current = false
 
-      // Clean up any partial stream
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop())
-        streamRef.current = null
-      }
-      if (videoRef.current) {
-        videoRef.current.srcObject = null
-      }
-
-      if (err instanceof Error && err.name === "NotAllowedError") {
+      if (err instanceof Error && err.message.includes("Permission")) {
         setCameraError("Camera permission denied. Please allow camera access and try again.")
       } else {
         setCameraError("Could not access camera. Please enter barcode manually.")
@@ -310,28 +237,26 @@ function BarcodeContent() {
     }
   }
 
-  const stopScanning = useCallback(() => {
-    scanningRef.current = false
-
-    // Stop the video stream
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
-      streamRef.current = null
+  const stopScanning = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop()
+        scannerRef.current.clear()
+      } catch (err) {
+        console.error("Error stopping scanner:", err)
+      }
+      scannerRef.current = null
     }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
-    }
-
-    readerRef.current = null
     setIsScanning(false)
   }, [])
 
   useEffect(() => {
     return () => {
-      stopScanning()
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {})
+      }
     }
-  }, [stopScanning])
+  }, [])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -340,31 +265,33 @@ function BarcodeContent() {
       <div className="p-4 space-y-4">
         {/* Camera View */}
         <Card className="overflow-hidden">
-          <div className="relative aspect-[4/3] bg-black">
-            {/* Video element - always rendered but hidden when not scanning */}
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`absolute inset-0 w-full h-full object-cover ${isScanning ? 'block' : 'hidden'}`}
+          <div className="relative bg-black">
+            {/* Scanner container */}
+            <div
+              id="barcode-scanner"
+              className={`w-full ${isScanning ? 'block' : 'hidden'}`}
+              style={{ minHeight: isScanning ? '300px' : '0' }}
             />
-            {isScanning ? (
+
+            {/* Start scanning button */}
+            {!isScanning && (
+              <div className="aspect-[4/3] flex flex-col items-center justify-center text-white">
+                <ScanBarcode className="h-16 w-16 mb-4 opacity-50" />
+                <Button onClick={startScanning} disabled={!!cameraError}>
+                  <Camera className="mr-2 h-4 w-4" />
+                  Start Scanning
+                </Button>
+                {cameraError && (
+                  <p className="text-sm text-red-400 mt-2 text-center px-4">
+                    {cameraError}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Stop button and overlays when scanning */}
+            {isScanning && (
               <>
-                {/* Scanning overlay */}
-                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-                  <div className="relative w-64 h-32">
-                    {/* Scanning frame */}
-                    <div className="absolute inset-0 border-2 border-white/70 rounded-lg" />
-                    {/* Animated scan line */}
-                    <div className="absolute left-0 right-0 h-0.5 bg-primary animate-scan" />
-                    {/* Corner accents */}
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl" />
-                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr" />
-                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br" />
-                  </div>
-                </div>
                 {/* Loading indicator when looking up */}
                 {isLookingUp && (
                   <div className="absolute inset-0 z-30 bg-black/50 flex items-center justify-center">
@@ -392,19 +319,6 @@ function BarcodeContent() {
                   Stop
                 </Button>
               </>
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-                <ScanBarcode className="h-16 w-16 mb-4 opacity-50" />
-                <Button onClick={startScanning} disabled={!!cameraError}>
-                  <Camera className="mr-2 h-4 w-4" />
-                  Start Scanning
-                </Button>
-                {cameraError && (
-                  <p className="text-sm text-red-400 mt-2 text-center px-4">
-                    {cameraError}
-                  </p>
-                )}
-              </div>
             )}
           </div>
         </Card>
