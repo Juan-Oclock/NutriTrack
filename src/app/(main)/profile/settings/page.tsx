@@ -5,10 +5,15 @@ import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate } from "lucide-react"
+import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate, Download } from "lucide-react"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>
+}
 
 interface Settings {
   notifications_enabled: boolean
@@ -31,6 +36,8 @@ const defaultSettings: Settings = {
 export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>(defaultSettings)
   const [isLoading, setIsLoading] = useState(true)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstalled, setIsInstalled] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -56,6 +63,48 @@ export default function SettingsPage() {
     }
     loadSettings()
   }, [supabase])
+
+  useEffect(() => {
+    // Check if already installed
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true)
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
+    }
+
+    const handleAppInstalled = () => {
+      setIsInstalled(true)
+      setDeferredPrompt(null)
+      toast.success("App installed successfully!")
+    }
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    window.addEventListener("appinstalled", handleAppInstalled)
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      window.removeEventListener("appinstalled", handleAppInstalled)
+    }
+  }, [])
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      toast.error("App installation is not available")
+      return
+    }
+
+    await deferredPrompt.prompt()
+    const { outcome } = await deferredPrompt.userChoice
+
+    if (outcome === "accepted") {
+      toast.success("Installing app...")
+    }
+
+    setDeferredPrompt(null)
+  }
 
   const updateSetting = async <K extends keyof Settings>(key: K, value: Settings[K]) => {
     const newSettings = { ...settings, [key]: value }
@@ -206,11 +255,44 @@ export default function SettingsPage() {
             }
           />
 
+          {!isInstalled && deferredPrompt && (
+            <motion.button
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleInstallClick}
+              className="w-full flex items-center justify-between p-4 border-t border-border/50 tap-highlight"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Download className="h-5 w-5 text-green-500" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Install App</p>
+                  <p className="text-sm text-muted-foreground">Add to home screen</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </motion.button>
+          )}
+
           <SettingRow
             icon={Smartphone}
             label="App Version"
             description="CalorieCue v1.0.0"
-            action={<span className="text-sm text-muted-foreground">Up to date</span>}
+            action={
+              isInstalled ? (
+                <span className="text-sm text-green-500 flex items-center gap-1">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Installed
+                </span>
+              ) : (
+                <span className="text-sm text-muted-foreground">Up to date</span>
+              )
+            }
             border
           />
         </motion.div>
