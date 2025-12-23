@@ -191,12 +191,14 @@ function BarcodeContent() {
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        // Explicitly play the video (required for mobile browsers)
+        await videoRef.current.play()
         setIsScanning(true)
         setCameraError(null)
 
         // Note: In a full implementation, you would use @zxing/browser here
         // to continuously scan for barcodes from the video stream
-        toast.info("Camera scanning is a demo. Enter barcode manually below.")
+        toast.info("Camera active. Enter barcode manually below for now.")
       }
     } catch (err) {
       console.error("Camera error:", err)
