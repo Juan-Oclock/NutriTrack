@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate, Download } from "lucide-react"
+import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate, Download, Share, X } from "lucide-react"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -38,6 +38,8 @@ export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -65,10 +67,17 @@ export default function SettingsPage() {
   }, [supabase])
 
   useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    // Check if already installed (works for both iOS and Android)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+    const isIOSStandalone = ("standalone" in window.navigator) && (window.navigator as Navigator & { standalone: boolean }).standalone
+
+    if (isStandalone || isIOSStandalone) {
       setIsInstalled(true)
     }
+
+    // Detect iOS
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window)
+    setIsIOS(isIOSDevice)
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
@@ -255,7 +264,8 @@ export default function SettingsPage() {
             }
           />
 
-          {!isInstalled && deferredPrompt && (
+          {/* Android Install Button */}
+          {!isInstalled && !isIOS && deferredPrompt && (
             <motion.button
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
@@ -275,6 +285,103 @@ export default function SettingsPage() {
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </motion.button>
+          )}
+
+          {/* iOS Install Button */}
+          {!isInstalled && isIOS && (
+            <motion.button
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowIOSInstructions(true)}
+              className="w-full flex items-center justify-between p-4 border-t border-border/50 tap-highlight"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Download className="h-5 w-5 text-green-500" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Install App</p>
+                  <p className="text-sm text-muted-foreground">Add to home screen</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </motion.button>
+          )}
+
+          {/* iOS Instructions Modal */}
+          {showIOSInstructions && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4"
+              onClick={() => setShowIOSInstructions(false)}
+            >
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-card w-full max-w-md rounded-2xl p-6 space-y-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Install CalorieCue</h3>
+                  <button
+                    onClick={() => setShowIOSInstructions(false)}
+                    className="h-8 w-8 rounded-full bg-muted flex items-center justify-center"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <p className="text-sm text-muted-foreground">
+                  To install CalorieCue on your iPhone, follow these steps:
+                </p>
+
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-semibold text-primary">1</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">Tap the Share button</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1">
+                        Look for the <Share className="h-4 w-4 inline" /> icon at the bottom of Safari
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-semibold text-primary">2</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">Scroll down and tap &quot;Add to Home Screen&quot;</p>
+                      <p className="text-sm text-muted-foreground">You may need to scroll to find it</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-semibold text-primary">3</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">Tap &quot;Add&quot; in the top right</p>
+                      <p className="text-sm text-muted-foreground">CalorieCue will appear on your home screen</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowIOSInstructions(false)}
+                  className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium"
+                >
+                  Got it
+                </button>
+              </motion.div>
+            </motion.div>
           )}
 
           <SettingRow
