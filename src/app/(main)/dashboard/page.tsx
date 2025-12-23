@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import { createClient } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CalorieRing } from "@/components/dashboard/calorie-ring"
@@ -8,7 +9,7 @@ import { MacroBars } from "@/components/dashboard/macro-bars"
 import { StreakCard } from "@/components/dashboard/streak-card"
 import { QuickActions } from "@/components/dashboard/quick-actions"
 import { formatDiaryDate, toDateString } from "@/lib/utils/date"
-import { ChevronRight, TrendingDown, Scale, BookOpen, ChartBar } from "lucide-react"
+import { ChevronRight, TrendingDown, Scale, BookOpen, ChartBar, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import type { Profile, NutritionGoal, UserStreak } from "@/types/database"
@@ -31,7 +32,13 @@ export default function DashboardPage() {
     fat: 0,
   })
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const supabase = createClient()
+  const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     async function loadDashboardData() {
@@ -41,44 +48,45 @@ export default function DashboardPage() {
 
         const today = toDateString(new Date())
 
-        // Fetch profile
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single()
+        // Fetch all data in parallel for better performance
+        const [
+          { data: profileData },
+          { data: goalsData },
+          { data: streakData },
+          { data: diaryData },
+          { data: quickAddData }
+        ] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("id, full_name, avatar_url, current_weight_kg, target_weight_kg")
+            .eq("id", user.id)
+            .single(),
+          supabase
+            .from("nutrition_goals")
+            .select("calories_goal, protein_goal_g, carbs_goal_g, fat_goal_g")
+            .eq("user_id", user.id)
+            .eq("is_active", true)
+            .single(),
+          supabase
+            .from("user_streaks")
+            .select("current_streak, longest_streak")
+            .eq("user_id", user.id)
+            .single(),
+          supabase
+            .from("diary_entries")
+            .select("logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g")
+            .eq("user_id", user.id)
+            .eq("date", today),
+          supabase
+            .from("quick_add_entries")
+            .select("calories, protein_g, carbs_g, fat_g")
+            .eq("user_id", user.id)
+            .eq("date", today)
+        ])
+
         if (profileData) setProfile(profileData as Profile)
-
-        // Fetch goals
-        const { data: goalsData } = await supabase
-          .from("nutrition_goals")
-          .select("*")
-          .eq("user_id", user.id)
-          .eq("is_active", true)
-          .single()
         if (goalsData) setGoals(goalsData as NutritionGoal)
-
-        // Fetch streak
-        const { data: streakData } = await supabase
-          .from("user_streaks")
-          .select("*")
-          .eq("user_id", user.id)
-          .single()
         if (streakData) setStreak(streakData as UserStreak)
-
-        // Fetch diary entries
-        const { data: diaryData } = await supabase
-          .from("diary_entries")
-          .select("logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g")
-          .eq("user_id", user.id)
-          .eq("date", today)
-
-        // Fetch quick add entries
-        const { data: quickAddData } = await supabase
-          .from("quick_add_entries")
-          .select("calories, protein_g, carbs_g, fat_g")
-          .eq("user_id", user.id)
-          .eq("date", today)
 
         // Calculate today's totals
         let totalCalories = 0
@@ -149,12 +157,28 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="pt-2"
+        className="pt-2 flex items-start justify-between"
       >
-        <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {greeting()}, {firstName}
-        </h1>
+        <div>
+          <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {greeting()}, {firstName}
+          </h1>
+        </div>
+        {mounted && (
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="h-10 w-10 rounded-xl bg-card elevation-1 flex items-center justify-center tap-highlight"
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-5 w-5 text-amber-500" />
+            ) : (
+              <Moon className="h-5 w-5 text-slate-600" />
+            )}
+          </motion.button>
+        )}
       </motion.div>
 
       {/* Main Calorie Card */}

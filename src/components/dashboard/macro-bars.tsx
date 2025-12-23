@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { memo } from "react"
 
 interface MacroBarsProps {
   protein: { consumed: number; goal: number }
@@ -11,7 +12,7 @@ interface MacroBarsProps {
   compact?: boolean
 }
 
-export function MacroBars({ protein, carbs, fat, className, compact = false }: MacroBarsProps) {
+export const MacroBars = memo(function MacroBars({ protein, carbs, fat, className, compact = false }: MacroBarsProps) {
   const macros = [
     {
       label: "Protein",
@@ -137,4 +138,4 @@ export function MacroBars({ protein, carbs, fat, className, compact = false }: M
       })}
     </div>
   )
-}
+})

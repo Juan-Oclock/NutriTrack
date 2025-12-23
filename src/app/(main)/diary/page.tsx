@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { DateSelector } from "@/components/diary/date-selector"
 import { DailySummary } from "@/components/diary/daily-summary"
@@ -28,26 +28,31 @@ export default function DiaryPage() {
 
       const dateStr = toDateString(selectedDate)
 
-      const { data: diaryData } = await supabase
-        .from("diary_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", dateStr)
-        .order("logged_at", { ascending: true })
-
-      const { data: quickAddData } = await supabase
-        .from("quick_add_entries")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("date", dateStr)
-        .order("created_at", { ascending: true })
-
-      const { data: goalsData } = await supabase
-        .from("nutrition_goals")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("is_active", true)
-        .single()
+      // Fetch all data in parallel for better performance
+      const [
+        { data: diaryData },
+        { data: quickAddData },
+        { data: goalsData }
+      ] = await Promise.all([
+        supabase
+          .from("diary_entries")
+          .select("id, meal_type, logged_at, logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g, food_name, servings, serving_description")
+          .eq("user_id", user.id)
+          .eq("date", dateStr)
+          .order("logged_at", { ascending: true }),
+        supabase
+          .from("quick_add_entries")
+          .select("id, meal_type, created_at, calories, protein_g, carbs_g, fat_g, description")
+          .eq("user_id", user.id)
+          .eq("date", dateStr)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("nutrition_goals")
+          .select("calories_goal, protein_goal_g, carbs_goal_g, fat_goal_g")
+          .eq("user_id", user.id)
+          .eq("is_active", true)
+          .single()
+      ])
 
       if (diaryData) setDiaryEntries(diaryData as DiaryEntry[])
       if (quickAddData) setQuickAddEntries(quickAddData as QuickAddEntry[])
@@ -84,36 +89,37 @@ export default function DiaryPage() {
     }
   }
 
-  // Calculate totals
-  const totals = {
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-  }
+  // Memoize totals calculation to avoid recalculating on every render
+  const totals = useMemo(() => {
+    const result = { calories: 0, protein: 0, carbs: 0, fat: 0 }
 
-  diaryEntries.forEach((entry) => {
-    totals.calories += entry.logged_calories || 0
-    totals.protein += entry.logged_protein_g || 0
-    totals.carbs += entry.logged_carbs_g || 0
-    totals.fat += entry.logged_fat_g || 0
-  })
+    diaryEntries.forEach((entry) => {
+      result.calories += entry.logged_calories || 0
+      result.protein += entry.logged_protein_g || 0
+      result.carbs += entry.logged_carbs_g || 0
+      result.fat += entry.logged_fat_g || 0
+    })
 
-  quickAddEntries.forEach((entry) => {
-    totals.calories += entry.calories || 0
-    totals.protein += entry.protein_g || 0
-    totals.carbs += entry.carbs_g || 0
-    totals.fat += entry.fat_g || 0
-  })
+    quickAddEntries.forEach((entry) => {
+      result.calories += entry.calories || 0
+      result.protein += entry.protein_g || 0
+      result.carbs += entry.carbs_g || 0
+      result.fat += entry.fat_g || 0
+    })
 
-  // Group entries by meal type
-  const entriesByMeal = mealTypes.reduce((acc, mealType) => {
-    acc[mealType] = [
-      ...diaryEntries.filter((e) => e.meal_type === mealType),
-      ...quickAddEntries.filter((e) => e.meal_type === mealType),
-    ]
-    return acc
-  }, {} as Record<MealType, (DiaryEntry | QuickAddEntry)[]>)
+    return result
+  }, [diaryEntries, quickAddEntries])
+
+  // Memoize entries grouped by meal type
+  const entriesByMeal = useMemo(() => {
+    return mealTypes.reduce((acc, mealType) => {
+      acc[mealType] = [
+        ...diaryEntries.filter((e) => e.meal_type === mealType),
+        ...quickAddEntries.filter((e) => e.meal_type === mealType),
+      ]
+      return acc
+    }, {} as Record<MealType, (DiaryEntry | QuickAddEntry)[]>)
+  }, [diaryEntries, quickAddEntries])
 
   if (isLoading) {
     return (

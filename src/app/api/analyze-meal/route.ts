@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { createClient } from "@/lib/supabase/server"
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
 
 interface DetectedFood {
   name: string
@@ -23,6 +25,9 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/
 // LogMeal API
 const LOGMEAL_API_URL = "https://api.logmeal.com/v2/image/segmentation/complete/v1.0"
 const LOGMEAL_NUTRITION_URL = "https://api.logmeal.com/v2/recipe/nutritionalInfo/v1.0"
+
+// Max image size: 5MB in base64 (roughly 6.6MB encoded)
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
 const NUTRITION_PROMPT = `Analyze this food image and identify all visible food items.
 For each food item, provide:
@@ -90,13 +95,11 @@ async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
 
     // Check for rate limiting
     if (response.status === 429) {
-      console.log("Gemini rate limited, trying fallback...")
       return { success: false, rateLimited: true }
     }
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error("Gemini API error:", errorText)
+      console.error("Gemini API error:", response.status)
       return { success: false, error: "Gemini API error" }
     }
 
@@ -107,14 +110,22 @@ async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
       return { success: false, error: "No response from Gemini" }
     }
 
-    // Parse JSON from response
+    // Parse JSON from response with try-catch
     const jsonMatch = content.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
       return { success: false, error: "No JSON in response" }
     }
 
-    const parsed = JSON.parse(jsonMatch[0])
-    return { success: true, foods: parsed.foods || [] }
+    try {
+      const parsed = JSON.parse(jsonMatch[0])
+      // Validate the response structure
+      if (!Array.isArray(parsed.foods)) {
+        return { success: false, error: "Invalid response format" }
+      }
+      return { success: true, foods: parsed.foods }
+    } catch {
+      return { success: false, error: "Invalid JSON in response" }
+    }
   } catch (error) {
     console.error("Gemini analysis error:", error)
     return { success: false, error: "Gemini analysis failed" }
@@ -151,7 +162,7 @@ async function analyzeWithLogMeal(base64Image: string): Promise<AnalysisResult> 
     }
 
     if (!segmentResponse.ok) {
-      console.error("LogMeal segmentation error:", await segmentResponse.text())
+      console.error("LogMeal segmentation error:", segmentResponse.status)
       return { success: false, error: "LogMeal API error" }
     }
 
@@ -214,6 +225,39 @@ async function analyzeWithLogMeal(base64Image: string): Promise<AnalysisResult> 
 }
 
 export async function POST(request: NextRequest) {
+  // Check authentication
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    )
+  }
+
+  // Rate limiting by user ID (stricter for meal analysis)
+  const rateLimitResult = checkRateLimit(
+    `meal-analysis:${user.id}`,
+    RATE_LIMITS.mealAnalysis
+  )
+
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      {
+        error: "Too many meal scans. Please wait a moment before trying again.",
+        fallback: true
+      },
+      {
+        status: 429,
+        headers: {
+          "X-RateLimit-Remaining": "0",
+          "X-RateLimit-Reset": rateLimitResult.resetTime.toString(),
+        }
+      }
+    )
+  }
+
   try {
     const { image } = await request.json()
 
@@ -229,11 +273,35 @@ export async function POST(request: NextRequest) {
       ? image.split("base64,")[1]
       : image
 
+    // Validate image size
+    const imageSize = Buffer.byteLength(base64Image, "base64")
+    if (imageSize > MAX_IMAGE_SIZE) {
+      return NextResponse.json(
+        { error: "Image too large. Please use an image under 5MB." },
+        { status: 400 }
+      )
+    }
+
+    // Basic validation that it's actually base64
+    if (!/^[A-Za-z0-9+/=]+$/.test(base64Image)) {
+      return NextResponse.json(
+        { error: "Invalid image format" },
+        { status: 400 }
+      )
+    }
+
     // Try Google Gemini first (primary)
     const geminiResult = await analyzeWithGemini(base64Image)
 
     if (geminiResult.success && geminiResult.foods) {
-      return NextResponse.json({ foods: geminiResult.foods })
+      return NextResponse.json(
+        { foods: geminiResult.foods },
+        {
+          headers: {
+            "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+          }
+        }
+      )
     }
 
     // If Gemini rate limited or failed, try LogMeal fallback
@@ -241,7 +309,14 @@ export async function POST(request: NextRequest) {
       const logmealResult = await analyzeWithLogMeal(base64Image)
 
       if (logmealResult.success && logmealResult.foods) {
-        return NextResponse.json({ foods: logmealResult.foods })
+        return NextResponse.json(
+          { foods: logmealResult.foods },
+          {
+            headers: {
+              "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
+            }
+          }
+        )
       }
 
       // If LogMeal also rate limited

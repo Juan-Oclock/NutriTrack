@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 
 interface CalorieRingProps {
   consumed: number
@@ -12,7 +12,7 @@ interface CalorieRingProps {
   className?: string
 }
 
-export function CalorieRing({
+export const CalorieRing = memo(function CalorieRing({
   consumed,
   goal,
   size = 180,
@@ -108,4 +108,4 @@ export function CalorieRing({
       </div>
     </div>
   )
-}
+})
