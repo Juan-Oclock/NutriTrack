@@ -38,12 +38,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const publicPaths = ["/", "/login", "/register", "/forgot-password", "/auth/callback"]
+  const publicApiPaths = ["/api/search-foods"]
   const isPublicPath = publicPaths.some(path => request.nextUrl.pathname === path)
+  const isPublicApiPath = publicApiPaths.some(path => request.nextUrl.pathname.startsWith(path))
   const isAuthPath = request.nextUrl.pathname.startsWith("/login") ||
                      request.nextUrl.pathname.startsWith("/register")
   const isOnboardingPath = request.nextUrl.pathname.startsWith("/onboarding")
 
-  if (!user && !isPublicPath) {
+  if (!user && !isPublicPath && !isPublicApiPath) {
     // No user, redirect to login
     const url = request.nextUrl.clone()
     url.pathname = "/login"

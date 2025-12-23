@@ -129,6 +129,7 @@ export interface Database {
           image_url: string | null
           is_verified: boolean
           created_by: string | null
+          usda_fdc_id: number | null
           created_at: string
           updated_at: string
         }
@@ -156,6 +157,7 @@ export interface Database {
           image_url?: string | null
           is_verified?: boolean
           created_by?: string | null
+          usda_fdc_id?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -183,6 +185,7 @@ export interface Database {
           image_url?: string | null
           is_verified?: boolean
           created_by?: string | null
+          usda_fdc_id?: number | null
           created_at?: string
           updated_at?: string
         }

@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge"
 import { Search, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { motion, AnimatePresence } from "framer-motion"
-import { useFoodSearch, type SearchResult } from "@/hooks/use-food-search"
+import { useFoodSearch, type SearchResult, type USDAFood } from "@/hooks/use-food-search"
 import { useServingOptions } from "@/hooks/use-serving-options"
+import { cacheUSDAFood } from "@/lib/food-cache"
 import { FoodDetailSheet } from "@/components/food-logging/food-detail-sheet"
 import { MealTypeSelector } from "@/components/food-logging/meal-type-selector"
 import { FilterTabs, type FilterTab } from "@/components/food-logging/filter-tabs"
@@ -116,12 +117,24 @@ function SearchContent() {
       }
 
       const isUserFood = "isUserFood" in food && food.isUserFood
+      const isUSDAFood = "isUSDA" in food && food.isUSDA
+
+      // Cache USDA food locally if needed
+      let foodId: string | null = null
+      if (isUSDAFood) {
+        foodId = await cacheUSDAFood(food as USDAFood)
+        if (!foodId) {
+          throw new Error("Failed to cache food")
+        }
+      } else if (!isUserFood) {
+        foodId = food.id
+      }
 
       const { error } = await supabase.from("diary_entries").insert({
         user_id: user.id,
         date,
         meal_type: mealType,
-        food_id: isUserFood ? null : food.id,
+        food_id: foodId,
         user_food_id: isUserFood ? food.id : null,
         servings: 1,
         logged_calories: food.calories,
@@ -167,14 +180,26 @@ function SearchContent() {
       }
 
       const isUserFood = "isUserFood" in selectedFood && selectedFood.isUserFood
+      const isUSDAFood = "isUSDA" in selectedFood && selectedFood.isUSDA
       const multiplier = data.servingOption.multiplier
       const servings = data.servings
+
+      // Cache USDA food locally if needed
+      let foodId: string | null = null
+      if (isUSDAFood) {
+        foodId = await cacheUSDAFood(selectedFood as USDAFood)
+        if (!foodId) {
+          throw new Error("Failed to cache food")
+        }
+      } else if (!isUserFood) {
+        foodId = selectedFood.id
+      }
 
       const { error } = await supabase.from("diary_entries").insert({
         user_id: user.id,
         date,
         meal_type: data.mealType,
-        food_id: isUserFood ? null : selectedFood.id,
+        food_id: foodId,
         user_food_id: isUserFood ? selectedFood.id : null,
         servings,
         logged_calories: (selectedFood.calories || 0) * multiplier * servings,

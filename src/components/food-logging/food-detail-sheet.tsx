@@ -17,7 +17,8 @@ import { ServingSizeSelector } from "./serving-size-selector"
 import { TimePicker } from "./time-picker"
 import { MealTypeSelector } from "./meal-type-selector"
 import { VerifiedBadge } from "./verified-badge"
-import type { Food, UserFood, MealType, FoodServingOption } from "@/types/database"
+import type { MealType, FoodServingOption } from "@/types/database"
+import type { SearchResult } from "@/hooks/use-food-search"
 
 interface ServingOption {
   id: string
@@ -29,7 +30,7 @@ interface ServingOption {
 }
 
 interface FoodDetailSheetProps {
-  food: (Food | UserFood) & { isUserFood?: boolean } | null
+  food: SearchResult | null
   servingOptions: FoodServingOption[]
   isOpen: boolean
   onClose: () => void
@@ -126,8 +127,8 @@ export function FoodDetailSheet({
     }
   }
 
-  const isVerified = food && !("isUserFood" in food && food.isUserFood) && (food as Food).is_verified
   const isUserFood = food && "isUserFood" in food && food.isUserFood
+  const isVerified = food && !isUserFood && "is_verified" in food && food.is_verified
 
   // Convert FoodServingOption[] to ServingOption[]
   const displayServingOptions: ServingOption[] = servingOptions.map((opt) => ({

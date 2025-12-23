@@ -5,8 +5,32 @@ import { createClient } from "@/lib/supabase/client"
 import { debounce } from "@/lib/utils"
 import type { Food, UserFood, FoodServingOption } from "@/types/database"
 
-export type SearchResult = (Food | UserFood) & {
+// Extended type for USDA foods
+export interface USDAFood {
+  id: string
+  fdcId: number
+  name: string
+  brand: string | null
+  serving_size: number
+  serving_unit: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+  fiber_g: number
+  sugar_g: number
+  sodium_mg: number
+  saturated_fat_g: number
+  cholesterol_mg: number
+  potassium_mg: number
+  is_verified: boolean
+  source: "usda"
+  dataType: string
+}
+
+export type SearchResult = (Food | UserFood | USDAFood) & {
   isUserFood?: boolean
+  isUSDA?: boolean
   serving_options?: FoodServingOption[]
 }
 
@@ -26,7 +50,7 @@ export function useFoodSearch(options: UseFoodSearchOptions = {}) {
   const {
     minQueryLength = 2,
     debounceMs = 300,
-    limit = 30,
+    limit = 25,
   } = options
 
   const [query, setQuery] = useState("")
@@ -60,26 +84,35 @@ export function useFoodSearch(options: UseFoodSearchOptions = {}) {
       try {
         const { data: { user } } = await supabase.auth.getUser()
 
-        // Search both tables in parallel
-        const [foodsRes, userFoodsRes] = await Promise.all([
+        // Search in parallel: USDA API + local user foods
+        const [usdaRes, localFoodsRes, userFoodsRes] = await Promise.all([
+          // USDA API search
+          fetch(`/api/search-foods?query=${encodeURIComponent(searchQuery)}&pageSize=${limit}`, {
+            signal: abortControllerRef.current.signal,
+          }).then(res => res.json()).catch(() => ({ foods: [], bestMatch: [], moreResults: [] })),
+
+          // Local foods table (for previously saved foods)
           supabase
             .from("foods")
             .select("*, food_serving_options(*)")
             .or(`name.ilike.%${searchQuery}%,brand.ilike.%${searchQuery}%`)
             .order("is_verified", { ascending: false })
             .order("name")
-            .limit(limit),
+            .limit(10),
+
+          // User's custom foods
           user
             ? supabase
                 .from("user_foods")
                 .select("*, food_serving_options(*)")
                 .eq("user_id", user.id)
                 .ilike("name", `%${searchQuery}%`)
-                .limit(Math.floor(limit / 3))
+                .limit(10)
             : Promise.resolve({ data: [] }),
         ])
 
-        const foods = (foodsRes.data || []) as (Food & { food_serving_options: FoodServingOption[] })[]
+        // Process local foods
+        const localFoods = (localFoodsRes.data || []) as (Food & { food_serving_options: FoodServingOption[] })[]
         const userFoods = ((userFoodsRes.data || []) as (UserFood & { food_serving_options: FoodServingOption[] })[]).map(
           (f) => ({
             ...f,
@@ -88,21 +121,46 @@ export function useFoodSearch(options: UseFoodSearchOptions = {}) {
           })
         )
 
-        // Separate verified (Best Match) from unverified (More Results)
-        const verifiedFoods = foods
-          .filter((f) => f.is_verified)
-          .map((f) => ({ ...f, serving_options: f.food_serving_options }))
-        const unverifiedFoods = foods
-          .filter((f) => !f.is_verified)
-          .map((f) => ({ ...f, serving_options: f.food_serving_options }))
+        // Process USDA foods
+        const usdaFoods = (usdaRes.foods || []).map((f: USDAFood) => ({
+          ...f,
+          isUSDA: true,
+        }))
 
-        // User foods go in More Results
-        const moreResults = [...userFoods, ...unverifiedFoods]
+        // Combine results
+        // Best Match: USDA Foundation/SR Legacy foods + verified local foods
+        const bestMatch: SearchResult[] = [
+          ...localFoods.filter(f => f.is_verified).map(f => ({ ...f, serving_options: f.food_serving_options })),
+          ...(usdaRes.bestMatch || []).map((f: USDAFood) => ({ ...f, isUSDA: true })),
+        ]
+
+        // More Results: User foods + unverified local + USDA branded foods
+        const moreResults: SearchResult[] = [
+          ...userFoods,
+          ...localFoods.filter(f => !f.is_verified).map(f => ({ ...f, serving_options: f.food_serving_options })),
+          ...(usdaRes.moreResults || []).map((f: USDAFood) => ({ ...f, isUSDA: true })),
+        ]
+
+        // Remove duplicates (prefer local over USDA if same name)
+        const seenNames = new Set<string>()
+        const dedupedBestMatch = bestMatch.filter(f => {
+          const key = f.name.toLowerCase()
+          if (seenNames.has(key)) return false
+          seenNames.add(key)
+          return true
+        })
+
+        const dedupedMoreResults = moreResults.filter(f => {
+          const key = f.name.toLowerCase()
+          if (seenNames.has(key)) return false
+          seenNames.add(key)
+          return true
+        })
 
         setResults({
-          bestMatch: verifiedFoods,
-          moreResults,
-          totalCount: verifiedFoods.length + moreResults.length,
+          bestMatch: dedupedBestMatch.slice(0, 10),
+          moreResults: dedupedMoreResults.slice(0, 20),
+          totalCount: dedupedBestMatch.length + dedupedMoreResults.length,
         })
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
