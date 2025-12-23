@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, ScanBarcode, Camera, AlertCircle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
-import { BrowserMultiFormatReader, BarcodeFormat } from "@zxing/browser"
-import { DecodeHintType } from "@zxing/library"
+import { BarcodeFormat, DecodeHintType, BrowserMultiFormatReader } from "@zxing/library"
 import type { Food, InsertTables } from "@/types/database"
 
 function BarcodeContent() {
@@ -29,7 +28,8 @@ function BarcodeContent() {
   const [lastScannedCode, setLastScannedCode] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const readerRef = useRef<BrowserMultiFormatReader | null>(null)
-  const controlsRef = useRef<{ stop: () => void } | null>(null)
+  const scanningRef = useRef<boolean>(false)
+  const streamRef = useRef<MediaStream | null>(null)
   const supabase = createClient()
 
   const lookupBarcode = async (barcode: string) => {
@@ -184,6 +184,25 @@ function BarcodeContent() {
     await lookupBarcode(barcode)
   }, [lastScannedCode, isLookingUp])
 
+  const scanLoop = useCallback(async () => {
+    if (!scanningRef.current || !videoRef.current || !readerRef.current) return
+
+    try {
+      const result = await readerRef.current.decodeFromVideoElement(videoRef.current)
+      if (result) {
+        const barcode = result.getText()
+        handleBarcodeDetected(barcode)
+      }
+    } catch {
+      // No barcode found in this frame - this is normal
+    }
+
+    // Continue scanning after a short delay
+    if (scanningRef.current) {
+      setTimeout(() => scanLoop(), 100)
+    }
+  }, [handleBarcodeDetected])
+
   const startScanning = async () => {
     try {
       // Check if we're in a secure context (HTTPS or localhost)
@@ -205,7 +224,33 @@ function BarcodeContent() {
       setCameraError(null)
       setLastScannedCode(null)
 
-      // Configure barcode reader for common product barcodes
+      // Get camera stream manually
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      })
+
+      streamRef.current = stream
+
+      // Attach stream to video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+
+        // Wait for video to be ready
+        await new Promise<void>((resolve) => {
+          if (videoRef.current) {
+            videoRef.current.onloadedmetadata = () => {
+              videoRef.current?.play().then(() => resolve())
+            }
+          }
+        })
+      }
+
+      // Configure barcode reader
       const hints = new Map()
       hints.set(DecodeHintType.POSSIBLE_FORMATS, [
         BarcodeFormat.EAN_13,
@@ -215,46 +260,31 @@ function BarcodeContent() {
         BarcodeFormat.CODE_128,
         BarcodeFormat.CODE_39,
       ])
+      hints.set(DecodeHintType.TRY_HARDER, true)
 
-      // Create reader instance
       const reader = new BrowserMultiFormatReader(hints)
       readerRef.current = reader
 
-      // Use decodeFromConstraints for continuous scanning with custom video constraints
-      const constraints: MediaStreamConstraints = {
-        video: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-      }
-
       setIsScanning(true)
+      scanningRef.current = true
 
-      // Start continuous scanning - this handles video setup internally
-      const controls = await reader.decodeFromConstraints(
-        constraints,
-        videoRef.current!,
-        (result, error) => {
-          if (result) {
-            const barcode = result.getText()
-            handleBarcodeDetected(barcode)
-          }
-          // Errors during scanning are normal (no barcode in frame), so we ignore them
-        }
-      )
-
-      controlsRef.current = controls
+      // Start scan loop
       toast.info("Point camera at a barcode to scan")
+      scanLoop()
     } catch (err) {
       console.error("Camera error:", err)
       setIsScanning(false)
+      scanningRef.current = false
+
       // Clean up any partial stream
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream
-        stream.getTracks().forEach((track) => track.stop())
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop())
+        streamRef.current = null
+      }
+      if (videoRef.current) {
         videoRef.current.srcObject = null
       }
+
       if (err instanceof Error && err.name === "NotAllowedError") {
         setCameraError("Camera permission denied. Please allow camera access and try again.")
       } else {
@@ -264,16 +294,15 @@ function BarcodeContent() {
   }
 
   const stopScanning = useCallback(() => {
-    // Stop the barcode reader
-    if (controlsRef.current) {
-      controlsRef.current.stop()
-      controlsRef.current = null
-    }
+    scanningRef.current = false
 
     // Stop the video stream
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream
-      stream.getTracks().forEach((track) => track.stop())
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
+    }
+
+    if (videoRef.current) {
       videoRef.current.srcObject = null
     }
 
