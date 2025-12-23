@@ -65,13 +65,16 @@ export async function POST(request: NextRequest) {
 
     let payload: AuthHookPayload
     try {
-      payload = wh.verify(body, headers) as AuthHookPayload
+      const verified = wh.verify(body, headers)
+      console.log("Auth hook payload received:", JSON.stringify(verified, null, 2))
+      payload = verified as AuthHookPayload
     } catch (err) {
       console.error("Webhook verification failed:", err)
       return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 })
     }
 
     const { type, user, email_data } = payload
+    console.log("Processing email hook - type:", type, "user:", user?.email)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL
       ? `https://${process.env.NEXT_PUBLIC_APP_URL.replace(/^https?:\/\//, "")}`
