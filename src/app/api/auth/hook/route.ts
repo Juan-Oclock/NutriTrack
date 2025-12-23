@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { Webhook } from "standardwebhooks"
 import { resend, EMAIL_FROM, isResendConfigured } from "@/lib/resend"
-import VerificationEmail from "@/emails/verification-email"
-import PasswordResetEmail from "@/emails/password-reset-email"
 
 // Handle CORS preflight requests
 export async function OPTIONS() {
@@ -99,18 +97,27 @@ export async function POST(request: NextRequest) {
         // Build the confirmation URL
         const confirmationUrl = `${baseUrl}/auth/callback?token_hash=${email_data.token_hash}&type=signup`
 
-        emailResult = await resend.emails.send({
-          from: EMAIL_FROM,
-          to: user.email,
-          subject: "Verify your email for CalorieCue",
-          react: VerificationEmail({
-            confirmationUrl,
-            userEmail: user.email,
-          }),
-        })
+        console.log("Sending signup email to:", user.email, "with URL:", confirmationUrl)
 
-        // Also send welcome email after a short delay (they'll get it after verifying)
-        // We could also trigger this from auth callback instead
+        try {
+          emailResult = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: user.email,
+            subject: "Verify your email for CalorieCue",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h1 style="color: #22c55e;">Welcome to CalorieCue!</h1>
+                <p>Thanks for signing up. Please verify your email address by clicking the button below:</p>
+                <a href="${confirmationUrl}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">Verify Email</a>
+                <p style="color: #666; font-size: 14px;">Or copy this link: ${confirmationUrl}</p>
+              </div>
+            `,
+          })
+          console.log("Email send result:", emailResult)
+        } catch (emailError) {
+          console.error("Email send error:", emailError instanceof Error ? { message: emailError.message, stack: emailError.stack } : emailError)
+          throw emailError
+        }
         break
       }
 
@@ -118,15 +125,26 @@ export async function POST(request: NextRequest) {
         // Build the password reset URL
         const resetUrl = `${baseUrl}/auth/callback?token_hash=${email_data.token_hash}&type=recovery`
 
-        emailResult = await resend.emails.send({
-          from: EMAIL_FROM,
-          to: user.email,
-          subject: "Reset your CalorieCue password",
-          react: PasswordResetEmail({
-            resetUrl,
-            userEmail: user.email,
-          }),
-        })
+        console.log("Sending recovery email to:", user.email)
+
+        try {
+          emailResult = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: user.email,
+            subject: "Reset your CalorieCue password",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h1 style="color: #22c55e;">Reset Your Password</h1>
+                <p>Click the button below to reset your password:</p>
+                <a href="${resetUrl}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">Reset Password</a>
+                <p style="color: #666; font-size: 14px;">Or copy this link: ${resetUrl}</p>
+              </div>
+            `,
+          })
+        } catch (emailError) {
+          console.error("Email send error:", emailError)
+          throw emailError
+        }
         break
       }
 
@@ -134,15 +152,26 @@ export async function POST(request: NextRequest) {
         // Build the magic link URL
         const magicLinkUrl = `${baseUrl}/auth/callback?token_hash=${email_data.token_hash}&type=magiclink`
 
-        emailResult = await resend.emails.send({
-          from: EMAIL_FROM,
-          to: user.email,
-          subject: "Sign in to CalorieCue",
-          react: VerificationEmail({
-            confirmationUrl: magicLinkUrl,
-            userEmail: user.email,
-          }),
-        })
+        console.log("Sending magiclink email to:", user.email)
+
+        try {
+          emailResult = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: user.email,
+            subject: "Sign in to CalorieCue",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h1 style="color: #22c55e;">Sign In to CalorieCue</h1>
+                <p>Click the button below to sign in:</p>
+                <a href="${magicLinkUrl}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">Sign In</a>
+                <p style="color: #666; font-size: 14px;">Or copy this link: ${magicLinkUrl}</p>
+              </div>
+            `,
+          })
+        } catch (emailError) {
+          console.error("Email send error:", emailError)
+          throw emailError
+        }
         break
       }
 
@@ -150,15 +179,26 @@ export async function POST(request: NextRequest) {
         // Build the email change confirmation URL
         const emailChangeUrl = `${baseUrl}/auth/callback?token_hash=${email_data.token_hash}&type=email_change`
 
-        emailResult = await resend.emails.send({
-          from: EMAIL_FROM,
-          to: user.email,
-          subject: "Confirm your new email for CalorieCue",
-          react: VerificationEmail({
-            confirmationUrl: emailChangeUrl,
-            userEmail: user.email,
-          }),
-        })
+        console.log("Sending email_change email to:", user.email)
+
+        try {
+          emailResult = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: user.email,
+            subject: "Confirm your new email for CalorieCue",
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h1 style="color: #22c55e;">Confirm Email Change</h1>
+                <p>Click the button below to confirm your new email address:</p>
+                <a href="${emailChangeUrl}" style="display: inline-block; background: #22c55e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 16px 0;">Confirm Email</a>
+                <p style="color: #666; font-size: 14px;">Or copy this link: ${emailChangeUrl}</p>
+              </div>
+            `,
+          })
+        } catch (emailError) {
+          console.error("Email send error:", emailError)
+          throw emailError
+        }
         break
       }
 
