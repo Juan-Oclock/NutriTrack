@@ -1,14 +1,16 @@
 "use client"
 
-import { useState, useEffect, useRef, Suspense } from "react"
+import { useState, useEffect, useRef, Suspense, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, ScanBarcode, Flashlight, Camera, AlertCircle } from "lucide-react"
+import { Loader2, ScanBarcode, Camera, AlertCircle, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
+import { BrowserMultiFormatReader, BarcodeFormat } from "@zxing/browser"
+import { DecodeHintType } from "@zxing/library"
 import type { Food, InsertTables } from "@/types/database"
 
 function BarcodeContent() {
@@ -24,7 +26,10 @@ function BarcodeContent() {
   const [servings, setServings] = useState("1")
   const [error, setError] = useState<string | null>(null)
   const [cameraError, setCameraError] = useState<string | null>(null)
+  const [lastScannedCode, setLastScannedCode] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null)
+  const controlsRef = useRef<{ stop: () => void } | null>(null)
   const supabase = createClient()
 
   const lookupBarcode = async (barcode: string) => {
@@ -167,6 +172,18 @@ function BarcodeContent() {
     }
   }
 
+  const handleBarcodeDetected = useCallback(async (barcode: string) => {
+    // Prevent duplicate lookups for the same barcode
+    if (barcode === lastScannedCode || isLookingUp) return
+
+    setLastScannedCode(barcode)
+    setManualBarcode(barcode)
+    toast.success(`Barcode detected: ${barcode}`)
+
+    // Auto-lookup the barcode
+    await lookupBarcode(barcode)
+  }, [lastScannedCode, isLookingUp])
+
   const startScanning = async () => {
     try {
       // Check if we're in a secure context (HTTPS or localhost)
@@ -185,23 +202,43 @@ function BarcodeContent() {
         return
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      })
+      setIsScanning(true)
+      setCameraError(null)
+      setLastScannedCode(null)
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        // Explicitly play the video (required for mobile browsers)
-        await videoRef.current.play()
-        setIsScanning(true)
-        setCameraError(null)
+      // Configure barcode reader for common product barcodes
+      const hints = new Map()
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.UPC_A,
+        BarcodeFormat.UPC_E,
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.CODE_39,
+      ])
 
-        // Note: In a full implementation, you would use @zxing/browser here
-        // to continuously scan for barcodes from the video stream
-        toast.info("Camera active. Enter barcode manually below for now.")
-      }
+      // Create reader instance
+      const reader = new BrowserMultiFormatReader(hints)
+      readerRef.current = reader
+
+      // Start continuous scanning
+      const controls = await reader.decodeFromVideoDevice(
+        undefined, // Use default camera (environment-facing on mobile)
+        videoRef.current!,
+        (result, error) => {
+          if (result) {
+            const barcode = result.getText()
+            handleBarcodeDetected(barcode)
+          }
+          // Errors during scanning are normal (no barcode in frame), so we ignore them
+        }
+      )
+
+      controlsRef.current = controls
+      toast.info("Point camera at a barcode to scan")
     } catch (err) {
       console.error("Camera error:", err)
+      setIsScanning(false)
       if (err instanceof Error && err.name === "NotAllowedError") {
         setCameraError("Camera permission denied. Please allow camera access and try again.")
       } else {
@@ -210,20 +247,29 @@ function BarcodeContent() {
     }
   }
 
-  const stopScanning = () => {
+  const stopScanning = useCallback(() => {
+    // Stop the barcode reader
+    if (controlsRef.current) {
+      controlsRef.current.stop()
+      controlsRef.current = null
+    }
+
+    // Stop the video stream
     if (videoRef.current?.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream
       stream.getTracks().forEach((track) => track.stop())
       videoRef.current.srcObject = null
     }
+
+    readerRef.current = null
     setIsScanning(false)
-  }
+  }, [])
 
   useEffect(() => {
     return () => {
       stopScanning()
     }
-  }, [])
+  }, [stopScanning])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -239,11 +285,41 @@ function BarcodeContent() {
                   ref={videoRef}
                   autoPlay
                   playsInline
+                  muted
                   className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-64 h-32 border-2 border-white rounded-lg" />
+                {/* Scanning overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="relative w-64 h-32">
+                    {/* Scanning frame */}
+                    <div className="absolute inset-0 border-2 border-white/70 rounded-lg" />
+                    {/* Animated scan line */}
+                    <div className="absolute left-0 right-0 h-0.5 bg-primary animate-scan" />
+                    {/* Corner accents */}
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl" />
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr" />
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl" />
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary rounded-br" />
+                  </div>
                 </div>
+                {/* Loading indicator when looking up */}
+                {isLookingUp && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="bg-background rounded-lg p-4 flex items-center gap-3">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>Looking up product...</span>
+                    </div>
+                  </div>
+                )}
+                {/* Last scanned indicator */}
+                {lastScannedCode && !isLookingUp && (
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="bg-background/90 rounded-lg p-2 flex items-center gap-2 text-sm">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="truncate">Scanned: {lastScannedCode}</span>
+                    </div>
+                  </div>
+                )}
                 <Button
                   variant="secondary"
                   size="sm"
