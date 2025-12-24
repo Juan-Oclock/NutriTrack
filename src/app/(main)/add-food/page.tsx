@@ -19,7 +19,7 @@ import { useServingOptions } from "@/hooks/use-serving-options"
 import type { Food, UserFood, Recipe, MealType } from "@/types/database"
 import type { SearchResult } from "@/hooks/use-food-search"
 
-interface RecentFood {
+interface DiaryEntryWithRelations {
   id: string
   food_id: string | null
   user_food_id: string | null
@@ -29,6 +29,8 @@ interface RecentFood {
   user_food: UserFood | null
   recipe: Recipe | null
 }
+
+type RecentFood = DiaryEntryWithRelations
 
 interface FrequentFood {
   food_id: string | null
@@ -113,7 +115,9 @@ function AddFoodContent() {
             .limit(20)
 
           // Combine and deduplicate by food_id or user_food_id
-          const allEntries = [...(entries || []), ...(userFoodEntries || [])]
+          const typedEntries = (entries || []) as DiaryEntryWithRelations[]
+          const typedUserFoodEntries = (userFoodEntries || []) as DiaryEntryWithRelations[]
+          const allEntries = [...typedEntries, ...typedUserFoodEntries]
           const seen = new Set<string>()
           const uniqueEntries = allEntries.filter(entry => {
             const key = entry.food_id || entry.user_food_id || entry.recipe_id
@@ -123,7 +127,7 @@ function AddFoodContent() {
           }).sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
             .slice(0, 20)
 
-          setRecentFoods(uniqueEntries as RecentFood[])
+          setRecentFoods(uniqueEntries)
         } else if (activeTab === "frequent") {
           // Get most frequently logged foods
           const { data: entries } = await supabase
@@ -133,8 +137,10 @@ function AddFoodContent() {
 
           if (entries) {
             // Count occurrences
+            type DiaryEntryPartial = { food_id: string | null, user_food_id: string | null }
+            const typedEntries = entries as DiaryEntryPartial[]
             const foodCounts = new Map<string, { food_id: string | null, user_food_id: string | null, count: number }>()
-            entries.forEach(entry => {
+            typedEntries.forEach(entry => {
               const key = entry.food_id || entry.user_food_id
               if (key) {
                 const existing = foodCounts.get(key) || { food_id: entry.food_id, user_food_id: entry.user_food_id, count: 0 }
@@ -152,17 +158,20 @@ function AddFoodContent() {
             const foodIds = sortedFoods.filter(f => f.food_id).map(f => f.food_id!)
             const userFoodIds = sortedFoods.filter(f => f.user_food_id).map(f => f.user_food_id!)
 
-            const [{ data: foods }, { data: userFoodsData }] = await Promise.all([
-              foodIds.length > 0
-                ? supabase.from("foods").select("*").in("id", foodIds)
-                : { data: [] },
-              userFoodIds.length > 0
-                ? supabase.from("user_foods").select("*").in("id", userFoodIds)
-                : { data: [] },
-            ])
+            let foods: Food[] = []
+            let userFoodsData: UserFood[] = []
 
-            const foodMap = new Map((foods || []).map(f => [f.id, f]))
-            const userFoodMap = new Map((userFoodsData || []).map(f => [f.id, f]))
+            if (foodIds.length > 0) {
+              const { data } = await supabase.from("foods").select("*").in("id", foodIds)
+              foods = (data || []) as Food[]
+            }
+            if (userFoodIds.length > 0) {
+              const { data } = await supabase.from("user_foods").select("*").in("id", userFoodIds)
+              userFoodsData = (data || []) as UserFood[]
+            }
+
+            const foodMap = new Map(foods.map(f => [f.id, f]))
+            const userFoodMap = new Map(userFoodsData.map(f => [f.id, f]))
 
             const frequentWithDetails: FrequentFood[] = sortedFoods.map(f => ({
               ...f,
