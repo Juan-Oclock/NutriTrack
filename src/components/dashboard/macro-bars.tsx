@@ -19,27 +19,33 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       short: "P",
       consumed: protein.consumed,
       goal: protein.goal,
-      color: "bg-protein",
-      textColor: "text-protein",
-      bgColor: "bg-protein/15",
+      gradient: "from-rose-400 to-rose-500",
+      bgGradient: "from-rose-500/20 to-rose-400/10",
+      ringColor: "stroke-rose-500",
+      textColor: "text-rose-500",
+      bgColor: "bg-rose-500/10",
     },
     {
       label: "Carbs",
       short: "C",
       consumed: carbs.consumed,
       goal: carbs.goal,
-      color: "bg-carbs",
-      textColor: "text-carbs",
-      bgColor: "bg-carbs/15",
+      gradient: "from-blue-400 to-blue-500",
+      bgGradient: "from-blue-500/20 to-blue-400/10",
+      ringColor: "stroke-blue-500",
+      textColor: "text-blue-500",
+      bgColor: "bg-blue-500/10",
     },
     {
       label: "Fat",
       short: "F",
       consumed: fat.consumed,
       goal: fat.goal,
-      color: "bg-fat",
-      textColor: "text-fat",
-      bgColor: "bg-fat/15",
+      gradient: "from-amber-400 to-amber-500",
+      bgGradient: "from-amber-500/20 to-amber-400/10",
+      ringColor: "stroke-amber-500",
+      textColor: "text-amber-500",
+      bgColor: "bg-amber-500/10",
     },
   ]
 
@@ -48,6 +54,9 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       <div className={cn("flex items-center justify-center gap-4", className)}>
         {macros.map((macro, index) => {
           const percentage = Math.min((macro.consumed / macro.goal) * 100, 100)
+          const circumference = 2 * Math.PI * 18
+          const strokeDashoffset = circumference - (percentage / 100) * circumference
+
           return (
             <motion.div
               key={macro.label}
@@ -56,33 +65,34 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
               transition={{ delay: index * 0.1 }}
               className="flex flex-col items-center gap-1"
             >
-              <div className={cn("w-12 h-12 rounded-full flex items-center justify-center relative", macro.bgColor)}>
-                <svg className="w-12 h-12 absolute transform -rotate-90">
+              <div className="relative w-12 h-12">
+                <svg className="w-12 h-12 transform -rotate-90">
                   <circle
                     cx="24"
                     cy="24"
-                    r="20"
+                    r="18"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="3"
+                    strokeWidth="4"
                     className="text-muted/10"
                   />
                   <motion.circle
                     cx="24"
                     cy="24"
-                    r="20"
+                    r="18"
                     fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeDasharray={125.6}
-                    initial={{ strokeDashoffset: 125.6 }}
-                    animate={{ strokeDashoffset: 125.6 - (percentage / 100) * 125.6 }}
+                    strokeWidth="4"
+                    strokeDasharray={circumference}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     strokeLinecap="round"
-                    className={macro.textColor}
+                    className={macro.ringColor}
                   />
                 </svg>
-                <span className={cn("text-xs font-bold", macro.textColor)}>{macro.short}</span>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={cn("text-xs font-bold", macro.textColor)}>{macro.short}</span>
+                </div>
               </div>
               <span className="text-xs text-muted-foreground">
                 {Math.round(macro.consumed)}g
@@ -95,43 +105,77 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
   }
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div className={cn("flex items-center justify-between gap-2", className)}>
       {macros.map((macro, index) => {
         const percentage = Math.min((macro.consumed / macro.goal) * 100, 100)
         const isOver = macro.consumed > macro.goal
+        const circumference = 2 * Math.PI * 24
+        const strokeDashoffset = circumference - (percentage / 100) * circumference
 
         return (
           <motion.div
             key={macro.label}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 + index * 0.1 }}
-            className="flex items-center gap-3"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6 + index * 0.1, type: "spring", stiffness: 200 }}
+            className={cn(
+              "flex-1 flex flex-col items-center p-3 rounded-2xl",
+              "bg-gradient-to-b",
+              macro.bgGradient
+            )}
           >
-            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", macro.bgColor)}>
-              <span className={cn("text-xs font-bold", macro.textColor)}>{macro.short}</span>
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium">{macro.label}</span>
+            {/* Circular Progress */}
+            <div className="relative w-14 h-14 mb-2">
+              <svg className="w-14 h-14 transform -rotate-90">
+                <circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="5"
+                  className="text-background/50"
+                />
+                <motion.circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  fill="none"
+                  strokeWidth="5"
+                  strokeDasharray={circumference}
+                  initial={{ strokeDashoffset: circumference }}
+                  animate={{ strokeDashoffset }}
+                  transition={{ duration: 1, ease: [0.4, 0, 0.2, 1], delay: 0.6 + index * 0.1 }}
+                  strokeLinecap="round"
+                  className={isOver ? "stroke-destructive" : macro.ringColor}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
                 <span className={cn(
-                  "text-xs tabular-nums",
-                  isOver ? "text-destructive font-medium" : "text-muted-foreground"
+                  "text-base font-bold",
+                  isOver ? "text-destructive" : macro.textColor
                 )}>
-                  {Math.round(macro.consumed)}/{macro.goal}g
+                  {Math.round(percentage)}%
                 </span>
               </div>
-              <div className={cn("h-1.5 rounded-full overflow-hidden", macro.bgColor)}>
-                <motion.div
-                  className={cn(
-                    "h-full rounded-full",
-                    isOver ? "bg-destructive" : macro.color
-                  )}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${percentage}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut", delay: 0.5 + index * 0.1 }}
-                />
-              </div>
+            </div>
+
+            {/* Label */}
+            <span className="text-xs font-semibold text-foreground/80 mb-0.5">
+              {macro.label}
+            </span>
+
+            {/* Values */}
+            <div className="text-center">
+              <span className={cn(
+                "text-sm font-bold tabular-nums",
+                isOver ? "text-destructive" : "text-foreground"
+              )}>
+                {Math.round(macro.consumed)}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                /{macro.goal}g
+              </span>
             </div>
           </motion.div>
         )
