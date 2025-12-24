@@ -86,13 +86,13 @@ export default function LoginPage() {
             </div>
           </motion.div>
         </div>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-foreground">
           Welcome{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
             back
           </span>
         </h1>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Sign in to continue your nutrition journey
         </p>
       </motion.div>
@@ -107,7 +107,7 @@ export default function LoginPage() {
       >
         {/* Email Field */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-white">
+          <Label className="flex items-center gap-2 text-foreground">
             <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Mail className="h-3.5 w-3.5 text-white" />
             </div>
@@ -120,14 +120,14 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
         {/* Password Field */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="flex items-center gap-2 text-white">
+            <Label className="flex items-center gap-2 text-foreground">
               <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
                 <Lock className="h-3.5 w-3.5 text-white" />
               </div>
@@ -147,7 +147,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
@@ -183,7 +183,7 @@ export default function LoginPage() {
         transition={{ delay: 0.4 }}
         className="text-center space-y-4"
       >
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"

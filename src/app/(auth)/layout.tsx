@@ -10,7 +10,7 @@ export default function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
@@ -26,7 +26,7 @@ export default function AuthLayout({
         >
           <Link
             href="/"
-            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
             <span className="text-sm font-medium">Back</span>
@@ -35,7 +35,7 @@ export default function AuthLayout({
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/25">
               <Leaf className="h-5 w-5 text-white" />
             </div>
-            <span className="ml-2 text-xl font-bold text-white tracking-tight">CalorieCue</span>
+            <span className="ml-2 text-xl font-bold text-foreground tracking-tight">CalorieCue</span>
           </Link>
         </motion.div>
 

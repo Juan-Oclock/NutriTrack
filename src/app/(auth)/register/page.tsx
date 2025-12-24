@@ -86,13 +86,13 @@ export default function RegisterPage() {
             </div>
           </motion.div>
         </div>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-foreground">
           Create your{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
             account
           </span>
         </h1>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Start your nutrition journey with CalorieCue
         </p>
       </motion.div>
@@ -107,7 +107,7 @@ export default function RegisterPage() {
       >
         {/* Full Name Field */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-white">
+          <Label className="flex items-center gap-2 text-foreground">
             <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
               <User className="h-3.5 w-3.5 text-white" />
             </div>
@@ -120,13 +120,13 @@ export default function RegisterPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
         {/* Email Field */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-white">
+          <Label className="flex items-center gap-2 text-foreground">
             <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
               <Mail className="h-3.5 w-3.5 text-white" />
             </div>
@@ -139,13 +139,13 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
         {/* Password Field */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-white">
+          <Label className="flex items-center gap-2 text-foreground">
             <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
               <Lock className="h-3.5 w-3.5 text-white" />
             </div>
@@ -158,13 +158,13 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
         {/* Confirm Password Field */}
         <div className="space-y-2">
-          <Label className="flex items-center gap-2 text-white">
+          <Label className="flex items-center gap-2 text-foreground">
             <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
               <Lock className="h-3.5 w-3.5 text-white" />
             </div>
@@ -177,7 +177,7 @@ export default function RegisterPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl placeholder:text-slate-500 focus:border-primary focus:ring-primary/20"
+            className="bg-muted/50 border-border text-foreground h-12 rounded-xl placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
           />
         </div>
 
@@ -211,7 +211,7 @@ export default function RegisterPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.35 }}
-        className="text-xs text-center text-slate-500"
+        className="text-xs text-center text-muted-foreground"
       >
         By creating an account, you agree to our{" "}
         <Link href="/terms" className="text-primary hover:text-primary/80 transition-colors">
@@ -230,7 +230,7 @@ export default function RegisterPage() {
         transition={{ delay: 0.4 }}
         className="text-center"
       >
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           Already have an account?{" "}
           <Link
             href="/login"
