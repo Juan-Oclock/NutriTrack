@@ -5,7 +5,22 @@ import Link from "next/link"
 import { Plus, Sun, Utensils, Moon, Cookie, ChevronDown, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
-import type { MealType, DiaryEntry, QuickAddEntry } from "@/types/database"
+import type { MealType, QuickAddEntry } from "@/types/database"
+
+// Extended type for diary entries with joined food data
+interface DiaryEntryWithFood {
+  id: string
+  meal_type: MealType
+  logged_at: string
+  logged_calories: number
+  logged_protein_g: number | null
+  logged_carbs_g: number | null
+  logged_fat_g: number | null
+  servings: number
+  foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
+  user_foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
+  recipes: { name: string } | null
+}
 
 const mealConfig: Record<MealType, { icon: React.ElementType; gradient: string }> = {
   breakfast: { icon: Sun, gradient: "from-amber-500 to-orange-500" },
@@ -23,7 +38,7 @@ const mealLabels: Record<MealType, string> = {
 
 interface MealSectionProps {
   mealType: MealType
-  entries: (DiaryEntry | QuickAddEntry)[]
+  entries: (DiaryEntryWithFood | QuickAddEntry)[]
   date: string
   onDeleteEntry?: (id: string, isQuickAdd: boolean) => void
 }
@@ -117,10 +132,32 @@ export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSect
                     const isQuickAdd = !("logged_calories" in entry)
                     const calories = isQuickAdd
                       ? (entry as QuickAddEntry).calories
-                      : (entry as DiaryEntry).logged_calories
-                    const name = isQuickAdd
-                      ? (entry as QuickAddEntry).description || "Quick Add"
-                      : "Food Entry"
+                      : (entry as DiaryEntryWithFood).logged_calories
+
+                    let name = "Quick Add"
+                    let servingInfo = ""
+                    if (isQuickAdd) {
+                      name = (entry as QuickAddEntry).description || "Quick Add"
+                    } else {
+                      const diaryEntry = entry as DiaryEntryWithFood
+                      if (diaryEntry.foods) {
+                        name = diaryEntry.foods.brand
+                          ? `${diaryEntry.foods.name} (${diaryEntry.foods.brand})`
+                          : diaryEntry.foods.name
+                        servingInfo = `${diaryEntry.servings} × ${diaryEntry.foods.serving_size}${diaryEntry.foods.serving_unit}`
+                      } else if (diaryEntry.user_foods) {
+                        name = diaryEntry.user_foods.brand
+                          ? `${diaryEntry.user_foods.name} (${diaryEntry.user_foods.brand})`
+                          : diaryEntry.user_foods.name
+                        servingInfo = `${diaryEntry.servings} × ${diaryEntry.user_foods.serving_size}${diaryEntry.user_foods.serving_unit}`
+                      } else if (diaryEntry.recipes) {
+                        name = diaryEntry.recipes.name
+                        servingInfo = `${diaryEntry.servings} serving${diaryEntry.servings !== 1 ? 's' : ''}`
+                      } else {
+                        name = "Food Entry"
+                        servingInfo = `${diaryEntry.servings} serving${diaryEntry.servings !== 1 ? 's' : ''}`
+                      }
+                    }
 
                     return (
                       <motion.div
@@ -133,9 +170,9 @@ export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSect
                       >
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">{name}</p>
-                          {!isQuickAdd && (
+                          {!isQuickAdd && servingInfo && (
                             <p className="text-xs text-muted-foreground">
-                              {(entry as DiaryEntry).servings} serving
+                              {servingInfo}
                             </p>
                           )}
                         </div>

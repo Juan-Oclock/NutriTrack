@@ -8,13 +8,28 @@ import { MealSection } from "@/components/diary/meal-section"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toDateString } from "@/lib/utils/date"
 import { toast } from "sonner"
-import type { DiaryEntry, QuickAddEntry, NutritionGoal, MealType } from "@/types/database"
+import type { QuickAddEntry, NutritionGoal, MealType } from "@/types/database"
+
+// Extended type for diary entries with joined food data
+interface DiaryEntryWithFood {
+  id: string
+  meal_type: MealType
+  logged_at: string
+  logged_calories: number
+  logged_protein_g: number | null
+  logged_carbs_g: number | null
+  logged_fat_g: number | null
+  servings: number
+  foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
+  user_foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
+  recipes: { name: string } | null
+}
 
 const mealTypes: MealType[] = ["breakfast", "lunch", "dinner", "snacks"]
 
 export default function DiaryPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
-  const [diaryEntries, setDiaryEntries] = useState<DiaryEntry[]>([])
+  const [diaryEntries, setDiaryEntries] = useState<DiaryEntryWithFood[]>([])
   const [quickAddEntries, setQuickAddEntries] = useState<QuickAddEntry[]>([])
   const [goals, setGoals] = useState<NutritionGoal | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,7 +51,12 @@ export default function DiaryPage() {
       ] = await Promise.all([
         supabase
           .from("diary_entries")
-          .select("id, meal_type, logged_at, logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g, food_name, servings, serving_description")
+          .select(`
+            id, meal_type, logged_at, logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g, servings,
+            foods (name, brand, serving_size, serving_unit),
+            user_foods (name, brand, serving_size, serving_unit),
+            recipes (name)
+          `)
           .eq("user_id", user.id)
           .eq("date", dateStr)
           .order("logged_at", { ascending: true }),
@@ -54,7 +74,7 @@ export default function DiaryPage() {
           .single()
       ])
 
-      if (diaryData) setDiaryEntries(diaryData as DiaryEntry[])
+      if (diaryData) setDiaryEntries(diaryData as DiaryEntryWithFood[])
       if (quickAddData) setQuickAddEntries(quickAddData as QuickAddEntry[])
       if (goalsData) setGoals(goalsData as NutritionGoal)
     } catch (error) {
@@ -118,7 +138,7 @@ export default function DiaryPage() {
         ...quickAddEntries.filter((e) => e.meal_type === mealType),
       ]
       return acc
-    }, {} as Record<MealType, (DiaryEntry | QuickAddEntry)[]>)
+    }, {} as Record<MealType, (DiaryEntryWithFood | QuickAddEntry)[]>)
   }, [diaryEntries, quickAddEntries])
 
   if (isLoading) {
