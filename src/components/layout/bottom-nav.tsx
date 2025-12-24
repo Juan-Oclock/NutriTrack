@@ -6,10 +6,18 @@ import { Home, BookOpen, Plus, CalendarDays, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 
+function getCurrentMeal(): string {
+  const hour = new Date().getHours()
+  if (hour < 10) return "breakfast"
+  if (hour < 14) return "lunch"
+  if (hour < 17) return "snacks"
+  return "dinner"
+}
+
 const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/diary", label: "Diary", icon: BookOpen },
-  { href: "/add-food", label: "Add", icon: Plus, isCenter: true },
+  { href: "/add-food", label: "Add", icon: Plus, isCenter: true, dynamic: true },
   { href: "/plans", label: "Plans", icon: CalendarDays },
   { href: "/profile", label: "Profile", icon: User },
 ]
@@ -26,10 +34,11 @@ export function BottomNav() {
             const Icon = item.icon
 
             if (item.isCenter) {
+              const href = item.dynamic ? `${item.href}?meal=${getCurrentMeal()}` : item.href
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={href}
                   className="flex items-center justify-center -mt-5 tap-highlight"
                 >
                   <motion.div

@@ -4,30 +4,38 @@ import Link from "next/link"
 import { ScanBarcode, Camera, Search, Zap } from "lucide-react"
 import { motion } from "framer-motion"
 
+function getCurrentMeal(): string {
+  const hour = new Date().getHours()
+  if (hour < 10) return "breakfast"
+  if (hour < 14) return "lunch"
+  if (hour < 17) return "snacks"
+  return "dinner"
+}
+
 const actions = [
   {
-    href: "/add-food/barcode",
+    path: "/add-food/barcode",
     label: "Scan",
     icon: ScanBarcode,
     gradient: "from-blue-500 to-blue-600",
     shadow: "shadow-blue-500/25",
   },
   {
-    href: "/add-food/meal-scan",
+    path: "/add-food/meal-scan",
     label: "Photo",
     icon: Camera,
     gradient: "from-purple-500 to-purple-600",
     shadow: "shadow-purple-500/25",
   },
   {
-    href: "/add-food/search",
+    path: "/add-food/search",
     label: "Search",
     icon: Search,
     gradient: "from-primary to-emerald-600",
     shadow: "shadow-primary/25",
   },
   {
-    href: "/add-food/quick-add",
+    path: "/add-food/quick-add",
     label: "Quick",
     icon: Zap,
     gradient: "from-orange-500 to-orange-600",
@@ -36,17 +44,22 @@ const actions = [
 ]
 
 export function QuickActions() {
+  const meal = getCurrentMeal()
+  const today = new Date().toISOString().split("T")[0]
+
   return (
     <div className="grid grid-cols-4 gap-2">
-      {actions.map((action, index) => (
+      {actions.map((action, index) => {
+        const href = `${action.path}?meal=${meal}&date=${today}`
+        return (
         <motion.div
-          key={action.href}
+          key={action.path}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 + index * 0.05 }}
         >
           <Link
-            href={action.href}
+            href={href}
             className="flex flex-col items-center gap-2 tap-highlight"
           >
             <motion.div
@@ -60,7 +73,8 @@ export function QuickActions() {
             </span>
           </Link>
         </motion.div>
-      ))}
+        )
+      })}
     </div>
   )
 }
