@@ -158,7 +158,7 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="pt-2 flex items-start justify-between"
+        className="pt-2 flex items-end justify-between"
       >
         <div>
           <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
