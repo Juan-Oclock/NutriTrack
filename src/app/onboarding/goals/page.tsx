@@ -124,6 +124,12 @@ export default function GoalsPage() {
         return
       }
 
+      // Deactivate any existing goals first
+      await supabase
+        .from("nutrition_goals")
+        .update({ is_active: false } as never)
+        .eq("user_id", user.id)
+
       const { error: goalsError } = await supabase
         .from("nutrition_goals")
         .insert({

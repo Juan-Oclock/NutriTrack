@@ -12,11 +12,11 @@ import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
-interface CustomFood {
+interface UserFood {
   id: string
   name: string
-  brand?: string
-  serving_size: string
+  brand: string | null
+  serving_size: number
   serving_unit: string
   calories: number
   protein_g: number
@@ -26,7 +26,7 @@ interface CustomFood {
 }
 
 export default function MyFoodsPage() {
-  const [foods, setFoods] = useState<CustomFood[]>([])
+  const [foods, setFoods] = useState<UserFood[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const supabase = createClient()
@@ -38,12 +38,12 @@ export default function MyFoodsPage() {
         if (!user) return
 
         const { data } = await supabase
-          .from("custom_foods")
+          .from("user_foods")
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
 
-        if (data) setFoods(data as CustomFood[])
+        if (data) setFoods(data as UserFood[])
       } catch (error) {
         console.error("Error loading foods:", error)
       } finally {
@@ -55,7 +55,7 @@ export default function MyFoodsPage() {
 
   const handleDelete = async (id: string) => {
     try {
-      await supabase.from("custom_foods").delete().eq("id", id)
+      await supabase.from("user_foods").delete().eq("id", id)
       setFoods(foods.filter(f => f.id !== id))
       toast.success("Food deleted")
     } catch (error) {
@@ -99,7 +99,7 @@ export default function MyFoodsPage() {
         </div>
 
         {/* Add Button */}
-        <Link href="/add-food?mode=create">
+        <Link href="/profile/my-foods/create">
           <motion.div
             whileTap={{ scale: 0.98 }}
             className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-600 text-white tap-highlight"
