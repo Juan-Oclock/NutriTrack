@@ -283,7 +283,7 @@ export default function DashboardPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          <Link href="/insights/weight" className="tap-highlight block">
+          <Link href="/profile/goals" className="tap-highlight block">
             <motion.div
               whileTap={{ scale: 0.98 }}
               className="bg-card rounded-2xl p-4 elevation-1"

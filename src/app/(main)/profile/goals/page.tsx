@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity, Check } from "lucide-react"
+import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity, Check, Scale } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
@@ -42,6 +43,8 @@ export default function GoalsPage() {
   const [goalType, setGoalType] = useState<GoalType | "">("")
   const [activityLevel, setActivityLevel] = useState<ActivityLevel | "">("")
   const [weeklyGoal, setWeeklyGoal] = useState([0.5])
+  const [currentWeight, setCurrentWeight] = useState("")
+  const [targetWeight, setTargetWeight] = useState("")
   const [calculatedGoals, setCalculatedGoals] = useState<{
     calories: number
     protein_g: number
@@ -80,6 +83,12 @@ export default function GoalsPage() {
           if (typedProfile.weekly_goal_kg) {
             setWeeklyGoal([typedProfile.weekly_goal_kg])
           }
+          if (typedProfile.current_weight_kg) {
+            setCurrentWeight(typedProfile.current_weight_kg.toString())
+          }
+          if (typedProfile.target_weight_kg) {
+            setTargetWeight(typedProfile.target_weight_kg.toString())
+          }
         }
         if (goalsData) setCurrentGoals(goalsData as NutritionGoal)
       } catch (error) {
@@ -92,10 +101,10 @@ export default function GoalsPage() {
   }, [supabase])
 
   useEffect(() => {
-    if (profile && goalType && activityLevel && profile.date_of_birth) {
+    if (profile && goalType && activityLevel && profile.date_of_birth && currentWeight) {
       const age = calculateAge(new Date(profile.date_of_birth))
       const goals = calculateNutritionGoals({
-        weight_kg: profile.current_weight_kg || 70,
+        weight_kg: parseFloat(currentWeight) || profile.current_weight_kg || 70,
         height_cm: profile.height_cm || 170,
         age,
         gender: (profile.gender as Gender) || "male",
@@ -105,7 +114,7 @@ export default function GoalsPage() {
       })
       setCalculatedGoals(goals)
     }
-  }, [profile, goalType, activityLevel, weeklyGoal])
+  }, [profile, goalType, activityLevel, weeklyGoal, currentWeight])
 
   const handleSave = async () => {
     if (!calculatedGoals || !profile) return
@@ -125,6 +134,8 @@ export default function GoalsPage() {
           goal_type: goalType,
           activity_level: activityLevel,
           weekly_goal_kg: goalType !== "maintain_weight" ? weeklyGoal[0] : null,
+          current_weight_kg: parseFloat(currentWeight) || null,
+          target_weight_kg: parseFloat(targetWeight) || null,
         } as never)
         .eq("id", user.id)
 
@@ -206,6 +217,62 @@ export default function GoalsPage() {
             </div>
           </motion.div>
         )}
+
+        {/* Weight Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="space-y-3"
+        >
+          <Label className="flex items-center gap-2">
+            <Scale className="h-4 w-4 text-purple-500" />
+            Weight
+          </Label>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Current (kg)</label>
+              <Input
+                type="number"
+                placeholder="70"
+                value={currentWeight}
+                onChange={(e) => setCurrentWeight(e.target.value)}
+                min="30"
+                max="300"
+                step="0.1"
+                className="h-12 text-center text-lg font-semibold"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Target (kg)</label>
+              <Input
+                type="number"
+                placeholder="65"
+                value={targetWeight}
+                onChange={(e) => setTargetWeight(e.target.value)}
+                min="30"
+                max="300"
+                step="0.1"
+                className="h-12 text-center text-lg font-semibold"
+              />
+            </div>
+          </div>
+          {currentWeight && targetWeight && (
+            <p className="text-xs text-center text-muted-foreground">
+              {parseFloat(currentWeight) > parseFloat(targetWeight) ? (
+                <span className="text-primary font-medium">
+                  {(parseFloat(currentWeight) - parseFloat(targetWeight)).toFixed(1)} kg to lose
+                </span>
+              ) : parseFloat(currentWeight) < parseFloat(targetWeight) ? (
+                <span className="text-orange-500 font-medium">
+                  {(parseFloat(targetWeight) - parseFloat(currentWeight)).toFixed(1)} kg to gain
+                </span>
+              ) : (
+                <span className="text-emerald-500 font-medium">At target weight!</span>
+              )}
+            </p>
+          )}
+        </motion.div>
 
         {/* Goal Type */}
         <motion.div
@@ -363,7 +430,7 @@ export default function GoalsPage() {
           <Button
             onClick={handleSave}
             className="w-full h-12 rounded-xl text-base font-semibold"
-            disabled={isSaving || !goalType || !activityLevel}
+            disabled={isSaving || !goalType || !activityLevel || !currentWeight}
           >
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes

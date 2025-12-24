@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
+import { Flame } from "lucide-react"
 
 interface DailySummaryProps {
   calories: { consumed: number; goal: number }
@@ -23,75 +24,167 @@ export function DailySummary({
   const isOver = calories.consumed > calories.goal
 
   const macros = [
-    { label: "Protein", short: "P", consumed: protein.consumed, goal: protein.goal, color: "text-protein", bgColor: "bg-protein" },
-    { label: "Carbs", short: "C", consumed: carbs.consumed, goal: carbs.goal, color: "text-carbs", bgColor: "bg-carbs" },
-    { label: "Fat", short: "F", consumed: fat.consumed, goal: fat.goal, color: "text-fat", bgColor: "bg-fat" },
+    {
+      label: "Protein",
+      short: "P",
+      consumed: protein.consumed,
+      goal: protein.goal,
+      ringColor: "stroke-rose-500",
+      textColor: "text-rose-500",
+      bgGradient: "from-rose-500/20 to-rose-400/10",
+    },
+    {
+      label: "Carbs",
+      short: "C",
+      consumed: carbs.consumed,
+      goal: carbs.goal,
+      ringColor: "stroke-blue-500",
+      textColor: "text-blue-500",
+      bgGradient: "from-blue-500/20 to-blue-400/10",
+    },
+    {
+      label: "Fat",
+      short: "F",
+      consumed: fat.consumed,
+      goal: fat.goal,
+      ringColor: "stroke-amber-500",
+      textColor: "text-amber-500",
+      bgGradient: "from-amber-500/20 to-amber-400/10",
+    },
   ]
 
   return (
-    <div className={cn("bg-card p-4", className)}>
-      {/* Calories progress bar */}
+    <div className={cn("bg-gradient-to-b from-card to-card/80 p-5", className)}>
+      {/* Calories Section */}
       <div className="flex items-center gap-4">
-        <div className="flex-1">
-          <div className="h-2.5 rounded-full bg-muted/30 overflow-hidden">
-            <motion.div
-              className={cn(
-                "h-full rounded-full",
-                isOver ? "bg-destructive" : "bg-primary"
-              )}
-              initial={{ width: 0 }}
-              animate={{ width: `${caloriePercentage}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+        {/* Mini calorie ring */}
+        <div className="relative w-16 h-16 shrink-0">
+          <svg className="w-16 h-16 transform -rotate-90">
+            <circle
+              cx="32"
+              cy="32"
+              r="26"
+              fill="none"
+              stroke="hsl(var(--muted))"
+              strokeWidth="6"
+              opacity={0.15}
             />
+            <motion.circle
+              cx="32"
+              cy="32"
+              r="26"
+              fill="none"
+              strokeWidth="6"
+              strokeDasharray={163.36}
+              initial={{ strokeDashoffset: 163.36 }}
+              animate={{ strokeDashoffset: 163.36 - (caloriePercentage / 100) * 163.36 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              strokeLinecap="round"
+              className={isOver ? "stroke-destructive" : "stroke-primary"}
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Flame className={cn(
+              "h-5 w-5",
+              isOver ? "text-destructive" : "text-primary"
+            )} />
           </div>
         </div>
-        <div className="text-right min-w-[100px]">
-          <span className="text-lg font-bold tabular-nums">
-            {Math.round(calories.consumed)}
-          </span>
-          <span className="text-sm text-muted-foreground">
-            {" "}/ {calories.goal}
-          </span>
+
+        {/* Calorie info */}
+        <div className="flex-1">
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-bold tabular-nums">
+              {Math.round(calories.consumed).toLocaleString()}
+            </span>
+            <span className="text-sm text-muted-foreground font-medium">
+              / {calories.goal.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-1">
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">
+              Calories
+            </span>
+            <span className={cn(
+              "text-xs font-semibold px-2.5 py-1 rounded-full",
+              isOver
+                ? "bg-destructive/10 text-destructive"
+                : "bg-primary/10 text-primary"
+            )}>
+              {Math.round(remaining).toLocaleString()} {isOver ? "over" : "left"}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Remaining badge */}
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-xs text-muted-foreground uppercase tracking-wide">
-          Calories
-        </span>
-        <span className={cn(
-          "text-xs font-medium px-2 py-0.5 rounded-full",
-          isOver ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"
-        )}>
-          {Math.round(remaining)} {isOver ? "over" : "left"}
-        </span>
-      </div>
-
-      {/* Macros - compact pills */}
-      <div className="flex justify-center gap-3 mt-4 pt-4 border-t border-border/50">
-        {macros.map((macro) => {
+      {/* Macros - Modern circular indicators */}
+      <div className="flex justify-between gap-2 mt-5 pt-4 border-t border-border/30">
+        {macros.map((macro, index) => {
           const percentage = Math.min((macro.consumed / macro.goal) * 100, 100)
           const macroIsOver = macro.consumed > macro.goal
+          const circumference = 2 * Math.PI * 16
 
           return (
-            <div key={macro.label} className="flex items-center gap-2">
-              <div className={cn(
-                "w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold",
-                macro.color,
-                `${macro.bgColor}/15`
-              )}>
-                {macro.short}
+            <motion.div
+              key={macro.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + index * 0.05 }}
+              className={cn(
+                "flex-1 flex flex-col items-center p-2.5 rounded-xl",
+                "bg-gradient-to-b",
+                macro.bgGradient
+              )}
+            >
+              {/* Mini ring */}
+              <div className="relative w-10 h-10 mb-1.5">
+                <svg className="w-10 h-10 transform -rotate-90">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    className="text-background/50"
+                  />
+                  <motion.circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    fill="none"
+                    strokeWidth="3"
+                    strokeDasharray={circumference}
+                    initial={{ strokeDashoffset: circumference }}
+                    animate={{ strokeDashoffset: circumference - (percentage / 100) * circumference }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 + index * 0.05 }}
+                    strokeLinecap="round"
+                    className={macroIsOver ? "stroke-destructive" : macro.ringColor}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    macroIsOver ? "text-destructive" : macro.textColor
+                  )}>
+                    {macro.short}
+                  </span>
+                </div>
               </div>
-              <div className="text-sm">
-                <span className={cn("font-semibold tabular-nums", macroIsOver && "text-destructive")}>
+
+              {/* Values */}
+              <div className="text-center">
+                <span className={cn(
+                  "text-sm font-bold tabular-nums",
+                  macroIsOver ? "text-destructive" : "text-foreground"
+                )}>
                   {Math.round(macro.consumed)}
                 </span>
-                <span className="text-muted-foreground text-xs">
-                  /{macro.goal}
+                <span className="text-[10px] text-muted-foreground">
+                  /{macro.goal}g
                 </span>
               </div>
-            </div>
+            </motion.div>
           )
         })}
       </div>

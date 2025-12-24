@@ -272,16 +272,16 @@ export default function InsightsPage() {
 
         {/* View More Links */}
         <div className="space-y-2">
-          <Link href="/insights/weight">
+          <Link href="/profile/goals">
             <Card className="hover:border-primary/50 transition-colors">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <Scale className="h-5 w-5 text-blue-600" />
+                  <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                    <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className="font-medium">Weight Progress</p>
-                    <p className="text-sm text-muted-foreground">Track your weight journey</p>
+                    <p className="font-medium">Weight & Goals</p>
+                    <p className="text-sm text-muted-foreground">Update your target weight</p>
                   </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -289,16 +289,16 @@ export default function InsightsPage() {
             </Card>
           </Link>
 
-          <Link href="/insights/nutrients">
+          <Link href="/diary">
             <Card className="hover:border-primary/50 transition-colors">
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
-                    <Award className="h-5 w-5 text-green-600" />
+                  <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                    <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className="font-medium">Nutrient Analysis</p>
-                    <p className="text-sm text-muted-foreground">Detailed nutrition breakdown</p>
+                    <p className="font-medium">Food Diary</p>
+                    <p className="text-sm text-muted-foreground">View your daily meals</p>
                   </div>
                 </div>
                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
