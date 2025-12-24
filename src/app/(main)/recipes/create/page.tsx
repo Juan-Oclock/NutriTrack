@@ -553,7 +553,7 @@ export default function CreateRecipePage() {
           </div>
 
           {/* Submit Button - Fixed above bottom nav */}
-          <div className="fixed bottom-24 left-0 right-0 px-4 z-40">
+          <div className="fixed left-0 right-0 px-4 z-40" style={{ bottom: '6.5rem' }}>
             <div className="max-w-lg mx-auto">
               <Button
                 type="submit"
