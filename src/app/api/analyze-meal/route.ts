@@ -19,8 +19,8 @@ interface AnalysisResult {
   error?: string
 }
 
-// Google Gemini API
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+// Google Gemini API - using gemini-2.0-flash model
+const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 // LogMeal API
 const LOGMEAL_API_URL = "https://api.logmeal.com/v2/image/segmentation/complete/v1.0"
@@ -61,8 +61,11 @@ async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
   const apiKey = process.env.GOOGLE_GEMINI_API_KEY
 
   if (!apiKey) {
+    console.error("GOOGLE_GEMINI_API_KEY not found in environment")
     return { success: false, error: "Gemini API key not configured" }
   }
+
+  console.log("Attempting Gemini analysis with model gemini-2.0-flash")
 
   try {
     const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
@@ -95,12 +98,14 @@ async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
 
     // Check for rate limiting
     if (response.status === 429) {
+      console.error("Gemini API rate limited")
       return { success: false, rateLimited: true }
     }
 
     if (!response.ok) {
-      console.error("Gemini API error:", response.status)
-      return { success: false, error: "Gemini API error" }
+      const errorText = await response.text()
+      console.error("Gemini API error:", response.status, errorText)
+      return { success: false, error: `Gemini API error: ${response.status}` }
     }
 
     const data = await response.json()
@@ -137,8 +142,11 @@ async function analyzeWithLogMeal(base64Image: string): Promise<AnalysisResult> 
   const apiKey = process.env.LOGMEAL_API_KEY
 
   if (!apiKey) {
+    console.error("LOGMEAL_API_KEY not found in environment")
     return { success: false, error: "LogMeal API key not configured" }
   }
+
+  console.log("Attempting LogMeal analysis as fallback")
 
   try {
     // Convert base64 to blob for LogMeal
@@ -158,12 +166,14 @@ async function analyzeWithLogMeal(base64Image: string): Promise<AnalysisResult> 
     })
 
     if (segmentResponse.status === 429) {
+      console.error("LogMeal API rate limited")
       return { success: false, rateLimited: true }
     }
 
     if (!segmentResponse.ok) {
-      console.error("LogMeal segmentation error:", segmentResponse.status)
-      return { success: false, error: "LogMeal API error" }
+      const errorText = await segmentResponse.text()
+      console.error("LogMeal segmentation error:", segmentResponse.status, errorText)
+      return { success: false, error: `LogMeal API error: ${segmentResponse.status}` }
     }
 
     const segmentData = await segmentResponse.json()
@@ -291,9 +301,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Try Google Gemini first (primary)
+    console.log("Starting meal analysis...")
     const geminiResult = await analyzeWithGemini(base64Image)
 
     if (geminiResult.success && geminiResult.foods) {
+      console.log("Gemini analysis successful, found", geminiResult.foods.length, "foods")
       return NextResponse.json(
         { foods: geminiResult.foods },
         {
@@ -304,11 +316,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log("Gemini failed:", geminiResult.error || "Unknown error")
+
     // If Gemini rate limited or failed, try LogMeal fallback
     if (geminiResult.rateLimited || !geminiResult.success) {
       const logmealResult = await analyzeWithLogMeal(base64Image)
 
       if (logmealResult.success && logmealResult.foods) {
+        console.log("LogMeal analysis successful, found", logmealResult.foods.length, "foods")
         return NextResponse.json(
           { foods: logmealResult.foods },
           {
@@ -318,6 +333,8 @@ export async function POST(request: NextRequest) {
           }
         )
       }
+
+      console.log("LogMeal failed:", logmealResult.error || "Unknown error")
 
       // If LogMeal also rate limited
       if (logmealResult.rateLimited) {
@@ -332,6 +349,7 @@ export async function POST(request: NextRequest) {
     }
 
     // All providers failed - graceful degradation
+    console.error("All meal analysis providers failed")
     return NextResponse.json(
       {
         error: "Could not analyze the meal. Please try searching for foods manually.",
