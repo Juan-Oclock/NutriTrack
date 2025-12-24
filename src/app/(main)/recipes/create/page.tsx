@@ -268,7 +268,7 @@ export default function CreateRecipePage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-32">
+    <div className="max-w-lg mx-auto pb-40">
       <Header title="Create Recipe" showBack />
 
       <div className="p-4">
@@ -552,17 +552,17 @@ export default function CreateRecipePage() {
             </div>
           </div>
 
-          {/* Submit Button - Fixed at bottom */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background border-t border-border safe-area-bottom">
+          {/* Submit Button - Fixed above bottom nav */}
+          <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
             <div className="max-w-lg mx-auto">
               <Button
                 type="submit"
                 onClick={handleSubmit}
                 className="w-full h-12 rounded-xl text-base font-semibold"
-                disabled={isLoading || ingredients.length === 0}
+                disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Recipe
+                {ingredients.length === 0 ? "Add Ingredients to Save" : "Create Recipe"}
               </Button>
             </div>
           </div>
