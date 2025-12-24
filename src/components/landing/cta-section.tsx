@@ -90,12 +90,12 @@ export function CTASection() {
 
   return (
     <section id="cta" className="py-20 lg:py-32 relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-emerald-500/5" />
+      {/* Background */}
+      <div className="absolute inset-0 bg-muted/30" />
 
       {/* Decorative elements */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
-      <div className="absolute top-1/2 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
       <div className="container relative mx-auto px-4 max-w-lg">
         <motion.div
@@ -107,7 +107,7 @@ export function CTASection() {
         >
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-4">
             Start Your Journey{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">
+            <span className="text-primary">
               Today
             </span>
           </h2>
@@ -125,7 +125,7 @@ export function CTASection() {
         >
           {/* Logo */}
           <div className="flex justify-center mb-6">
-            <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-lg shadow-primary/25">
+            <div className="h-14 w-14 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
               <Leaf className="h-8 w-8 text-white" />
             </div>
           </div>
@@ -200,7 +200,7 @@ export function CTASection() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90" disabled={isLoading}>
+                <Button type="submit" className="w-full h-12 rounded-xl text-base font-semibold bg-primary hover:bg-primary/90" disabled={isLoading}>
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
@@ -257,7 +257,7 @@ export function CTASection() {
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-12 rounded-xl text-base font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90" disabled={isLoading}>
+                <Button type="submit" className="w-full h-12 rounded-xl text-base font-semibold bg-primary hover:bg-primary/90" disabled={isLoading}>
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (

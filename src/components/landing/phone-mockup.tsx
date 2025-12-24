@@ -35,7 +35,7 @@ function DashboardPlaceholder() {
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="hsl(153 60% 45%)" />
-                  <stop offset="100%" stopColor="hsl(160 70% 45%)" />
+                  <stop offset="100%" stopColor="hsl(153 60% 45%)" />
                 </linearGradient>
               </defs>
             </svg>
@@ -83,7 +83,7 @@ function DashboardPlaceholder() {
       </div>
 
       {/* Streak card */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-3">
+      <div className="bg-orange-500 rounded-2xl p-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">🔥</span>
           <div>
@@ -154,7 +154,7 @@ function InsightsPlaceholder() {
         <div className="h-24 flex items-end justify-between gap-1">
           {[70, 65, 60, 55, 58, 52, 48].map((h, i) => (
             <div key={i} className="flex-1 bg-primary/20 rounded-t" style={{ height: `${h}%` }}>
-              <div className="h-full bg-gradient-to-t from-primary to-emerald-500 rounded-t" style={{ height: "70%" }} />
+              <div className="h-full bg-primary rounded-t" style={{ height: "70%" }} />
             </div>
           ))}
         </div>

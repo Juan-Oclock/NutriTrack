@@ -280,7 +280,7 @@ export default function CreateRecipePage() {
           {/* Header Card */}
           <div className="bg-card rounded-2xl p-5 elevation-1">
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center">
                 <ChefHat className="h-6 w-6 text-white" />
               </div>
               <div>

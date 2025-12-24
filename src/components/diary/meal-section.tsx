@@ -24,33 +24,28 @@ interface DiaryEntryWithFood {
 
 const mealConfig: Record<MealType, {
   icon: React.ElementType
-  gradient: string
-  bgGradient: string
+  bgColor: string
   lightBg: string
 }> = {
   breakfast: {
     icon: Sun,
-    gradient: "from-amber-400 to-orange-500",
-    bgGradient: "from-amber-500/10 to-orange-500/5",
+    bgColor: "bg-amber-500",
     lightBg: "bg-amber-500/10"
   },
   lunch: {
     icon: Utensils,
-    gradient: "from-emerald-400 to-teal-500",
-    bgGradient: "from-emerald-500/10 to-teal-500/5",
-    lightBg: "bg-emerald-500/10"
+    bgColor: "bg-primary",
+    lightBg: "bg-primary/10"
   },
   dinner: {
     icon: Moon,
-    gradient: "from-indigo-400 to-purple-500",
-    bgGradient: "from-indigo-500/10 to-purple-500/5",
+    bgColor: "bg-indigo-500",
     lightBg: "bg-indigo-500/10"
   },
   snacks: {
     icon: Cookie,
-    gradient: "from-pink-400 to-rose-500",
-    bgGradient: "from-pink-500/10 to-rose-500/5",
-    lightBg: "bg-pink-500/10"
+    bgColor: "bg-rose-500",
+    lightBg: "bg-rose-500/10"
   },
 }
 
@@ -70,7 +65,7 @@ interface MealSectionProps {
 
 export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSectionProps) {
   const [isExpanded, setIsExpanded] = useState(true)
-  const { icon: Icon, gradient, bgGradient, lightBg } = mealConfig[mealType]
+  const { icon: Icon, bgColor, lightBg } = mealConfig[mealType]
 
   const totalCalories = entries.reduce((sum, entry) => {
     if ("logged_calories" in entry) {
@@ -85,8 +80,7 @@ export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSect
       animate={{ opacity: 1, y: 0 }}
       className={cn(
         "rounded-2xl overflow-hidden",
-        "bg-gradient-to-br",
-        bgGradient,
+        lightBg,
         "border border-border/40"
       )}
     >
@@ -98,8 +92,8 @@ export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSect
           className="flex items-center gap-3 tap-highlight"
         >
           <div className={cn(
-            "h-11 w-11 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-            gradient
+            "h-11 w-11 rounded-xl flex items-center justify-center shadow-lg",
+            bgColor
           )}>
             <Icon className="h-5 w-5 text-white" />
           </div>
@@ -131,9 +125,8 @@ export function MealSection({ mealType, entries, date, onDeleteEntry }: MealSect
               whileTap={{ scale: 0.9 }}
               whileHover={{ scale: 1.05 }}
               className={cn(
-                "h-10 w-10 rounded-xl flex items-center justify-center tap-highlight",
-                "bg-gradient-to-br shadow-md",
-                gradient
+                "h-10 w-10 rounded-xl flex items-center justify-center tap-highlight shadow-md",
+                bgColor
               )}
             >
               <Plus className="h-5 w-5 text-white" strokeWidth={2.5} />

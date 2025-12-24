@@ -72,7 +72,7 @@ export default function SupportPage() {
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
               <span className="font-bold text-xl text-foreground">CalorieCue</span>
@@ -160,7 +160,7 @@ export default function SupportPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90"
+                className="bg-primary hover:bg-primary/90"
                 asChild
               >
                 <a href="mailto:onelasttimejuan@gmail.com">

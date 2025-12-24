@@ -102,7 +102,7 @@ export default function MyFoodsPage() {
         <Link href="/profile/my-foods/create">
           <motion.div
             whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-primary to-emerald-600 text-white tap-highlight"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-primary text-white tap-highlight"
           >
             <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Plus className="h-5 w-5" />

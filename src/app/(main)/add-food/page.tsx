@@ -16,29 +16,9 @@ import { toast } from "sonner"
 import { FoodDetailSheet } from "@/components/food-logging/food-detail-sheet"
 import { QuickAddButton } from "@/components/food-logging/quick-add-button"
 import { useServingOptions } from "@/hooks/use-serving-options"
+import { useRecentFoods, useFrequentFoods, useMyFoods, useMyRecipes } from "@/hooks/use-add-food-data"
 import type { Food, UserFood, Recipe, MealType } from "@/types/database"
 import type { SearchResult } from "@/hooks/use-food-search"
-
-interface DiaryEntryWithRelations {
-  id: string
-  food_id: string | null
-  user_food_id: string | null
-  recipe_id: string | null
-  logged_at: string
-  food: Food | null
-  user_food: UserFood | null
-  recipe: Recipe | null
-}
-
-type RecentFood = DiaryEntryWithRelations
-
-interface FrequentFood {
-  food_id: string | null
-  user_food_id: string | null
-  count: number
-  food: Food | null
-  user_food: UserFood | null
-}
 
 function AddFoodContent() {
   const searchParams = useSearchParams()
@@ -47,16 +27,24 @@ function AddFoodContent() {
   const date = searchParams.get("date") || new Date().toISOString().split("T")[0]
 
   const [activeTab, setActiveTab] = useState("recent")
-  const [isLoading, setIsLoading] = useState(false)
-  const [recentFoods, setRecentFoods] = useState<RecentFood[]>([])
-  const [frequentFoods, setFrequentFoods] = useState<FrequentFood[]>([])
-  const [userFoods, setUserFoods] = useState<UserFood[]>([])
-  const [recipes, setRecipes] = useState<Recipe[]>([])
   const [selectedFood, setSelectedFood] = useState<SearchResult | null>(null)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [quickAddingId, setQuickAddingId] = useState<string | null>(null)
 
   const supabase = createClient()
+
+  // React Query hooks for cached data fetching
+  const { data: recentFoods = [], isLoading: isLoadingRecent } = useRecentFoods()
+  const { data: frequentFoods = [], isLoading: isLoadingFrequent } = useFrequentFoods()
+  const { data: userFoods = [], isLoading: isLoadingMyFoods } = useMyFoods()
+  const { data: recipes = [], isLoading: isLoadingRecipes } = useMyRecipes()
+
+  // Get loading state based on active tab
+  const isLoading =
+    (activeTab === "recent" && isLoadingRecent) ||
+    (activeTab === "frequent" && isLoadingFrequent) ||
+    (activeTab === "my-foods" && isLoadingMyFoods) ||
+    (activeTab === "recipes" && isLoadingRecipes)
 
   // Serving options for selected food
   const { options: servingOptions, isLoading: isLoadingOptions } = useServingOptions({
@@ -68,143 +56,6 @@ function AddFoodContent() {
       : null,
     enabled: !!selectedFood,
   })
-
-  // Load data based on active tab
-  useEffect(() => {
-    async function loadTabData() {
-      setIsLoading(true)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        if (activeTab === "recent") {
-          // Get recent diary entries with food details
-          const { data: entries } = await supabase
-            .from("diary_entries")
-            .select(`
-              id,
-              food_id,
-              user_food_id,
-              recipe_id,
-              logged_at,
-              food:foods(*),
-              user_food:user_foods(*),
-              recipe:recipes(*)
-            `)
-            .eq("user_id", user.id)
-            .not("food_id", "is", null)
-            .order("logged_at", { ascending: false })
-            .limit(20)
-
-          // Also get entries with user_food_id
-          const { data: userFoodEntries } = await supabase
-            .from("diary_entries")
-            .select(`
-              id,
-              food_id,
-              user_food_id,
-              recipe_id,
-              logged_at,
-              food:foods(*),
-              user_food:user_foods(*),
-              recipe:recipes(*)
-            `)
-            .eq("user_id", user.id)
-            .not("user_food_id", "is", null)
-            .order("logged_at", { ascending: false })
-            .limit(20)
-
-          // Combine and deduplicate by food_id or user_food_id
-          const typedEntries = (entries || []) as DiaryEntryWithRelations[]
-          const typedUserFoodEntries = (userFoodEntries || []) as DiaryEntryWithRelations[]
-          const allEntries = [...typedEntries, ...typedUserFoodEntries]
-          const seen = new Set<string>()
-          const uniqueEntries = allEntries.filter(entry => {
-            const key = entry.food_id || entry.user_food_id || entry.recipe_id
-            if (!key || seen.has(key)) return false
-            seen.add(key)
-            return true
-          }).sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
-            .slice(0, 20)
-
-          setRecentFoods(uniqueEntries)
-        } else if (activeTab === "frequent") {
-          // Get most frequently logged foods
-          const { data: entries } = await supabase
-            .from("diary_entries")
-            .select("food_id, user_food_id")
-            .eq("user_id", user.id)
-
-          if (entries) {
-            // Count occurrences
-            type DiaryEntryPartial = { food_id: string | null, user_food_id: string | null }
-            const typedEntries = entries as DiaryEntryPartial[]
-            const foodCounts = new Map<string, { food_id: string | null, user_food_id: string | null, count: number }>()
-            typedEntries.forEach(entry => {
-              const key = entry.food_id || entry.user_food_id
-              if (key) {
-                const existing = foodCounts.get(key) || { food_id: entry.food_id, user_food_id: entry.user_food_id, count: 0 }
-                existing.count++
-                foodCounts.set(key, existing)
-              }
-            })
-
-            // Sort by count and take top 20
-            const sortedFoods = Array.from(foodCounts.values())
-              .sort((a, b) => b.count - a.count)
-              .slice(0, 20)
-
-            // Fetch food details
-            const foodIds = sortedFoods.filter(f => f.food_id).map(f => f.food_id!)
-            const userFoodIds = sortedFoods.filter(f => f.user_food_id).map(f => f.user_food_id!)
-
-            let foods: Food[] = []
-            let userFoodsData: UserFood[] = []
-
-            if (foodIds.length > 0) {
-              const { data } = await supabase.from("foods").select("*").in("id", foodIds)
-              foods = (data || []) as Food[]
-            }
-            if (userFoodIds.length > 0) {
-              const { data } = await supabase.from("user_foods").select("*").in("id", userFoodIds)
-              userFoodsData = (data || []) as UserFood[]
-            }
-
-            const foodMap = new Map(foods.map(f => [f.id, f]))
-            const userFoodMap = new Map(userFoodsData.map(f => [f.id, f]))
-
-            const frequentWithDetails: FrequentFood[] = sortedFoods.map(f => ({
-              ...f,
-              food: f.food_id ? foodMap.get(f.food_id) || null : null,
-              user_food: f.user_food_id ? userFoodMap.get(f.user_food_id) || null : null,
-            }))
-
-            setFrequentFoods(frequentWithDetails)
-          }
-        } else if (activeTab === "my-foods") {
-          const { data } = await supabase
-            .from("user_foods")
-            .select("*")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-          setUserFoods(data || [])
-        } else if (activeTab === "recipes") {
-          const { data } = await supabase
-            .from("recipes")
-            .select("*")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-          setRecipes(data || [])
-        }
-      } catch (error) {
-        console.error("Error loading tab data:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadTabData()
-  }, [activeTab, supabase])
 
   const handleSelectFood = (food: SearchResult) => {
     setSelectedFood(food)
@@ -330,19 +181,19 @@ function AddFoodContent() {
       href: `/add-food/barcode?meal=${meal}&date=${date}`,
       icon: ScanBarcode,
       label: "Scan",
-      gradient: "from-blue-500 to-blue-600",
+      bgColor: "bg-primary",
     },
     {
       href: `/add-food/meal-scan?meal=${meal}&date=${date}`,
       icon: Camera,
       label: "Photo",
-      gradient: "from-purple-500 to-purple-600",
+      bgColor: "bg-primary",
     },
     {
       href: `/add-food/quick-add?meal=${meal}&date=${date}`,
       icon: Zap,
       label: "Quick",
-      gradient: "from-orange-500 to-orange-600",
+      bgColor: "bg-primary",
     },
   ]
 
@@ -469,8 +320,8 @@ function AddFoodContent() {
                 className="flex flex-col items-center gap-2 tap-highlight"
               >
                 <div className={cn(
-                  "h-16 w-16 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg",
-                  action.gradient
+                  "h-16 w-16 rounded-2xl flex items-center justify-center shadow-lg",
+                  action.bgColor
                 )}>
                   <action.icon className="h-7 w-7 text-white" />
                 </div>

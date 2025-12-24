@@ -14,7 +14,7 @@ export default function AuthLayout({
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <div className="container max-w-lg mx-auto px-4 py-6 relative z-10 min-h-screen flex flex-col">
@@ -32,7 +32,7 @@ export default function AuthLayout({
             <span className="text-sm font-medium">Back</span>
           </Link>
           <Link href="/" className="flex items-center">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/25">
+            <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
               <Leaf className="h-5 w-5 text-white" />
             </div>
             <span className="ml-2 text-xl font-bold text-foreground tracking-tight">CalorieCue</span>

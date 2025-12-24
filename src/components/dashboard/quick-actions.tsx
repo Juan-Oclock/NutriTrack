@@ -17,29 +17,29 @@ const actions = [
     path: "/add-food/barcode",
     label: "Scan",
     icon: ScanBarcode,
-    gradient: "from-blue-500 to-blue-600",
-    shadow: "shadow-blue-500/25",
+    bgColor: "bg-primary",
+    shadow: "shadow-primary/25",
   },
   {
     path: "/add-food/meal-scan",
     label: "Photo",
     icon: Camera,
-    gradient: "from-purple-500 to-purple-600",
-    shadow: "shadow-purple-500/25",
+    bgColor: "bg-primary",
+    shadow: "shadow-primary/25",
   },
   {
     path: "/add-food/search",
     label: "Search",
     icon: Search,
-    gradient: "from-primary to-emerald-600",
+    bgColor: "bg-primary",
     shadow: "shadow-primary/25",
   },
   {
     path: "/add-food/quick-add",
     label: "Quick",
     icon: Zap,
-    gradient: "from-orange-500 to-orange-600",
-    shadow: "shadow-orange-500/25",
+    bgColor: "bg-primary",
+    shadow: "shadow-primary/25",
   },
 ]
 
@@ -64,7 +64,7 @@ export function QuickActions() {
           >
             <motion.div
               whileTap={{ scale: 0.9 }}
-              className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${action.gradient} flex items-center justify-center shadow-lg ${action.shadow}`}
+              className={`h-14 w-14 rounded-2xl ${action.bgColor} flex items-center justify-center shadow-lg ${action.shadow}`}
             >
               <action.icon className="h-6 w-6 text-white" />
             </motion.div>

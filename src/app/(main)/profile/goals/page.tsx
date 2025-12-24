@@ -308,7 +308,7 @@ export default function GoalsPage() {
                   )}
                   <div className={cn(
                     "h-10 w-10 rounded-xl flex items-center justify-center mb-2",
-                    isSelected ? "bg-white/20" : `bg-gradient-to-br ${option.color}`
+                    isSelected ? "bg-white/20" : option.color
                   )}>
                     <option.icon className={cn("h-5 w-5", isSelected ? "" : "text-white")} />
                   </div>
@@ -394,7 +394,7 @@ export default function GoalsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-primary/20 to-emerald-500/10 rounded-2xl p-5 border border-primary/30"
+            className="bg-primary/10 rounded-2xl p-5 border border-primary/30"
           >
             <div className="flex items-center gap-2 mb-4">
               <Flame className="h-5 w-5 text-primary" />

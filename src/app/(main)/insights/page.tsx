@@ -1,11 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, lazy, Suspense } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -20,17 +19,11 @@ import {
 } from "lucide-react"
 import { subDays, format } from "date-fns"
 import { toDateString } from "@/lib/utils/date"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  BarChart,
-  Bar,
-} from "recharts"
+
+// Lazy load chart component to reduce initial bundle (~80KB savings)
+const WeeklyCalorieChart = lazy(() =>
+  import("@/components/charts/weekly-calorie-chart").then(mod => ({ default: mod.WeeklyCalorieChart }))
+)
 
 interface DailyStats {
   date: string
@@ -196,27 +189,10 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            {/* Calorie Chart */}
-            <ResponsiveContainer width="100%" height={150}>
-              <BarChart data={weeklyStats}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => format(new Date(date), "EEE")}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis hide />
-                <Tooltip
-                  formatter={(value) => [`${value} cal`, "Calories"]}
-                  labelFormatter={(date) => format(new Date(String(date)), "MMM d")}
-                />
-                <Bar
-                  dataKey="calories"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {/* Calorie Chart - Lazy Loaded */}
+            <Suspense fallback={<Skeleton className="w-full h-[150px]" />}>
+              <WeeklyCalorieChart data={weeklyStats} />
+            </Suspense>
           </CardContent>
         </Card>
 

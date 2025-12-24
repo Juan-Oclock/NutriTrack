@@ -14,7 +14,7 @@ export function StreakCard({ currentStreak, longestStreak }: StreakCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 p-4"
+      className="relative overflow-hidden rounded-2xl bg-orange-500 p-4"
     >
       {/* Decorative background elements */}
       <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-white/10 blur-xl" />

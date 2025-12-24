@@ -29,10 +29,10 @@ import { cn } from "@/lib/utils"
 import type { Profile, NutritionGoal } from "@/types/database"
 
 const menuItems = [
-  { href: "/profile/goals", icon: Target, label: "Nutrition Goals", color: "from-primary to-emerald-600" },
-  { href: "/profile/my-foods", icon: Apple, label: "My Foods", color: "from-red-500 to-orange-500" },
-  { href: "/recipes", icon: ChefHat, label: "My Recipes", color: "from-purple-500 to-pink-500" },
-  { href: "/profile/settings", icon: Settings, label: "Settings", color: "from-gray-500 to-gray-600" },
+  { href: "/profile/goals", icon: Target, label: "Nutrition Goals", bgColor: "bg-primary" },
+  { href: "/profile/my-foods", icon: Apple, label: "My Foods", bgColor: "bg-primary" },
+  { href: "/recipes", icon: ChefHat, label: "My Recipes", bgColor: "bg-primary" },
+  { href: "/profile/settings", icon: Settings, label: "Settings", bgColor: "bg-muted-foreground" },
 ]
 
 const supportItems = [
@@ -210,8 +210,8 @@ export default function ProfilePage() {
               >
                 <div className="flex items-center gap-3">
                   <div className={cn(
-                    "h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm",
-                    item.color
+                    "h-10 w-10 rounded-xl flex items-center justify-center shadow-sm",
+                    item.bgColor
                   )}>
                     <item.icon className="h-5 w-5 text-white" />
                   </div>

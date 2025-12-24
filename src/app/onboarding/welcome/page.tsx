@@ -10,25 +10,25 @@ const features = [
     icon: Apple,
     title: "Track Meals",
     description: "Log food with our extensive database",
-    gradient: "from-emerald-500 to-green-600",
+    bgColor: "bg-primary",
   },
   {
     icon: Camera,
     title: "Scan & Log",
     description: "Barcode scanning & AI recognition",
-    gradient: "from-blue-500 to-indigo-600",
+    bgColor: "bg-primary",
   },
   {
     icon: Target,
     title: "Set Goals",
     description: "Personalized calorie & macro targets",
-    gradient: "from-orange-500 to-red-500",
+    bgColor: "bg-primary",
   },
   {
     icon: BarChart3,
     title: "View Insights",
     description: "Track progress with detailed reports",
-    gradient: "from-purple-500 to-pink-500",
+    bgColor: "bg-primary",
   },
 ]
 
@@ -63,14 +63,14 @@ export default function WelcomePage() {
           className="flex justify-center mb-6"
         >
           <div className="relative">
-            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-2xl shadow-primary/30">
+            <div className="h-24 w-24 rounded-3xl bg-primary flex items-center justify-center shadow-2xl shadow-primary/30">
               <Sparkles className="h-12 w-12 text-white" />
             </div>
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="absolute -right-2 -top-2 h-8 w-8 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg"
+              className="absolute -right-2 -top-2 h-8 w-8 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg"
             >
               <Zap className="h-4 w-4 text-white" />
             </motion.div>
@@ -84,7 +84,7 @@ export default function WelcomePage() {
           className="text-3xl font-bold tracking-tight text-white"
         >
           Welcome to{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+          <span className="text-primary">
             CalorieCue
           </span>
         </motion.h1>
@@ -113,10 +113,10 @@ export default function WelcomePage() {
             whileTap={{ scale: 0.98 }}
             className="relative p-4 rounded-2xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 hover:border-slate-600 transition-all duration-300 overflow-hidden group"
           >
-            {/* Gradient glow on hover */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+            {/* Glow on hover */}
+            <div className="absolute inset-0 bg-primary opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
 
-            <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-3 shadow-lg`}>
+            <div className={`h-11 w-11 rounded-xl ${feature.bgColor} flex items-center justify-center mb-3 shadow-lg`}>
               <feature.icon className="h-5 w-5 text-white" />
             </div>
             <h3 className="font-semibold text-white text-sm mb-1">{feature.title}</h3>
@@ -153,7 +153,7 @@ export default function WelcomePage() {
       >
         <Button
           size="lg"
-          className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
+          className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
           onClick={() => router.push("/onboarding/profile")}
         >
           Get Started

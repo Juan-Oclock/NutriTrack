@@ -57,7 +57,7 @@ export function BenefitsSection() {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
             Designed for Your{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">
+            <span className="text-primary">
               Success
             </span>
           </h2>

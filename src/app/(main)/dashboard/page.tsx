@@ -2,132 +2,30 @@
 
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
-import { createClient } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CalorieRing } from "@/components/dashboard/calorie-ring"
 import { MacroBars } from "@/components/dashboard/macro-bars"
 import { StreakCard } from "@/components/dashboard/streak-card"
 import { QuickActions } from "@/components/dashboard/quick-actions"
-import { formatDiaryDate, toDateString } from "@/lib/utils/date"
+import { formatDiaryDate } from "@/lib/utils/date"
 import { ChevronRight, TrendingDown, Scale, BookOpen, ChartBar, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { NotificationBell } from "@/components/notifications/notification-bell"
-import type { Profile, NutritionGoal, UserStreak } from "@/types/database"
-
-interface DailySummary {
-  calories: number
-  protein: number
-  carbs: number
-  fat: number
-}
+import { useDashboardData } from "@/hooks/use-dashboard-data"
+import { useUserId } from "@/hooks/use-user"
 
 export default function DashboardPage() {
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [goals, setGoals] = useState<NutritionGoal | null>(null)
-  const [streak, setStreak] = useState<UserStreak | null>(null)
-  const [todaySummary, setTodaySummary] = useState<DailySummary>({
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
-  const supabase = createClient()
   const { theme, setTheme } = useTheme()
+  const { userId, isLoading: isUserLoading } = useUserId()
+  const { profile, goals, streak, todaySummary, isLoading: isDataLoading } = useDashboardData(userId)
+
+  const isLoading = isUserLoading || isDataLoading
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  useEffect(() => {
-    async function loadDashboardData() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-
-        const today = toDateString(new Date())
-
-        // Fetch all data in parallel for better performance
-        const [
-          { data: profileData },
-          { data: goalsData },
-          { data: streakData },
-          { data: diaryData },
-          { data: quickAddData }
-        ] = await Promise.all([
-          supabase
-            .from("profiles")
-            .select("id, full_name, avatar_url, current_weight_kg, target_weight_kg")
-            .eq("id", user.id)
-            .single(),
-          supabase
-            .from("nutrition_goals")
-            .select("calories_goal, protein_goal_g, carbs_goal_g, fat_goal_g")
-            .eq("user_id", user.id)
-            .eq("is_active", true)
-            .single(),
-          supabase
-            .from("user_streaks")
-            .select("current_streak, longest_streak")
-            .eq("user_id", user.id)
-            .single(),
-          supabase
-            .from("diary_entries")
-            .select("logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g")
-            .eq("user_id", user.id)
-            .eq("date", today),
-          supabase
-            .from("quick_add_entries")
-            .select("calories, protein_g, carbs_g, fat_g")
-            .eq("user_id", user.id)
-            .eq("date", today)
-        ])
-
-        if (profileData) setProfile(profileData as Profile)
-        if (goalsData) setGoals(goalsData as NutritionGoal)
-        if (streakData) setStreak(streakData as UserStreak)
-
-        // Calculate today's totals
-        let totalCalories = 0
-        let totalProtein = 0
-        let totalCarbs = 0
-        let totalFat = 0
-
-        if (diaryData) {
-          (diaryData as { logged_calories: number; logged_protein_g: number | null; logged_carbs_g: number | null; logged_fat_g: number | null }[]).forEach((entry) => {
-            totalCalories += entry.logged_calories || 0
-            totalProtein += entry.logged_protein_g || 0
-            totalCarbs += entry.logged_carbs_g || 0
-            totalFat += entry.logged_fat_g || 0
-          })
-        }
-
-        if (quickAddData) {
-          (quickAddData as { calories: number; protein_g: number | null; carbs_g: number | null; fat_g: number | null }[]).forEach((entry) => {
-            totalCalories += entry.calories || 0
-            totalProtein += entry.protein_g || 0
-            totalCarbs += entry.carbs_g || 0
-            totalFat += entry.fat_g || 0
-          })
-        }
-
-        setTodaySummary({
-          calories: totalCalories,
-          protein: totalProtein,
-          carbs: totalCarbs,
-          fat: totalFat,
-        })
-      } catch (error) {
-        console.error("Error loading dashboard:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadDashboardData()
-  }, [supabase])
 
   if (isLoading) {
     return (

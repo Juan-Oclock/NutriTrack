@@ -19,8 +19,6 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       short: "P",
       consumed: protein.consumed,
       goal: protein.goal,
-      gradient: "from-rose-400 to-rose-500",
-      bgGradient: "from-rose-500/20 to-rose-400/10",
       ringColor: "stroke-rose-500",
       textColor: "text-rose-500",
       bgColor: "bg-rose-500/10",
@@ -30,8 +28,6 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       short: "C",
       consumed: carbs.consumed,
       goal: carbs.goal,
-      gradient: "from-blue-400 to-blue-500",
-      bgGradient: "from-blue-500/20 to-blue-400/10",
       ringColor: "stroke-blue-500",
       textColor: "text-blue-500",
       bgColor: "bg-blue-500/10",
@@ -41,8 +37,6 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       short: "F",
       consumed: fat.consumed,
       goal: fat.goal,
-      gradient: "from-amber-400 to-amber-500",
-      bgGradient: "from-amber-500/20 to-amber-400/10",
       ringColor: "stroke-amber-500",
       textColor: "text-amber-500",
       bgColor: "bg-amber-500/10",
@@ -120,8 +114,7 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
             transition={{ delay: 0.6 + index * 0.1, type: "spring", stiffness: 200 }}
             className={cn(
               "flex-1 flex flex-col items-center p-3 rounded-2xl",
-              "bg-gradient-to-b",
-              macro.bgGradient
+              macro.bgColor
             )}
           >
             {/* Circular Progress */}

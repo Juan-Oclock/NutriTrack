@@ -34,21 +34,21 @@ const contactOptions = [
     label: "Email Support",
     description: "Get help within 24 hours",
     action: "support@caloriecue.app",
-    color: "from-blue-500 to-blue-600",
+    bgColor: "bg-primary",
   },
   {
     icon: MessageCircle,
     label: "Live Chat",
     description: "Chat with our team",
     action: "Start chat",
-    color: "from-emerald-500 to-emerald-600",
+    bgColor: "bg-primary",
   },
   {
     icon: BookOpen,
     label: "Knowledge Base",
     description: "Browse articles & guides",
     action: "Visit docs",
-    color: "from-purple-500 to-purple-600",
+    bgColor: "bg-primary",
   },
 ]
 
@@ -78,8 +78,8 @@ export default function HelpPage() {
                 className="flex items-center gap-3 p-4 rounded-2xl bg-card elevation-1 tap-highlight text-left w-full"
               >
                 <div className={cn(
-                  "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-sm",
-                  option.color
+                  "h-12 w-12 rounded-xl flex items-center justify-center shadow-sm",
+                  option.bgColor
                 )}>
                   <option.icon className="h-6 w-6 text-white" />
                 </div>

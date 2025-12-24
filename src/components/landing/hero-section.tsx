@@ -17,12 +17,12 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-[90vh] flex items-center py-12 lg:py-20 overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-emerald-500/5 dark:from-primary/10 dark:via-background dark:to-emerald-500/10" />
+      {/* Background */}
+      <div className="absolute inset-0 bg-muted/30" />
 
       {/* Decorative blobs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 
       <div className="container relative mx-auto px-4 max-w-7xl">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
@@ -54,7 +54,7 @@ export function HeroSection() {
               className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground"
             >
               Track Your{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">
+              <span className="text-primary">
                 Nutrition Journey
               </span>{" "}
               with Confidence
@@ -81,7 +81,7 @@ export function HeroSection() {
               <Button
                 size="lg"
                 onClick={scrollToCta}
-                className="h-14 px-8 rounded-xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 group shadow-lg shadow-primary/25"
+                className="h-14 px-8 rounded-xl text-lg font-semibold bg-primary hover:bg-primary/90 group shadow-lg shadow-primary/25"
               >
                 Get Started Free
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />

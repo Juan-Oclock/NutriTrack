@@ -4,6 +4,7 @@ import "./globals.css"
 import { Toaster } from "@/components/ui/toast"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeColorMeta } from "@/components/theme-color-meta"
+import { QueryProvider } from "@/providers/query-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,16 +103,18 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ThemeColorMeta />
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ThemeColorMeta />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   )

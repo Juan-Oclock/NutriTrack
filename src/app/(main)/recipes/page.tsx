@@ -100,7 +100,7 @@ export default function RecipesPage() {
         <Link href="/recipes/create">
           <motion.div
             whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white tap-highlight"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-primary text-white tap-highlight"
           >
             <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
               <Plus className="h-5 w-5" />

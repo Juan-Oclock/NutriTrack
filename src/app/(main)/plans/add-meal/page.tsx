@@ -28,11 +28,11 @@ interface FoodItem {
   type: "food" | "user_food" | "recipe"
 }
 
-const mealConfig: Record<MealType, { icon: React.ElementType; label: string; gradient: string }> = {
-  breakfast: { icon: Sun, label: "Breakfast", gradient: "from-amber-400 to-orange-500" },
-  lunch: { icon: Utensils, label: "Lunch", gradient: "from-emerald-400 to-teal-500" },
-  dinner: { icon: Moon, label: "Dinner", gradient: "from-indigo-400 to-purple-500" },
-  snacks: { icon: Cookie, label: "Snacks", gradient: "from-pink-400 to-rose-500" },
+const mealConfig: Record<MealType, { icon: React.ElementType; label: string; bgColor: string; lightBg: string }> = {
+  breakfast: { icon: Sun, label: "Breakfast", bgColor: "bg-amber-500", lightBg: "bg-amber-500/10" },
+  lunch: { icon: Utensils, label: "Lunch", bgColor: "bg-primary", lightBg: "bg-primary/10" },
+  dinner: { icon: Moon, label: "Dinner", bgColor: "bg-indigo-500", lightBg: "bg-indigo-500/10" },
+  snacks: { icon: Cookie, label: "Snacks", bgColor: "bg-rose-500", lightBg: "bg-rose-500/10" },
 }
 
 function AddMealContent() {
@@ -246,12 +246,11 @@ function AddMealContent() {
         {/* Meal Type Indicator */}
         <div className={cn(
           "flex items-center gap-3 p-4 rounded-2xl",
-          "bg-gradient-to-br",
-          config.gradient.replace("from-", "from-").replace("to-", "to-") + "/10"
+          config.lightBg
         )}>
           <div className={cn(
-            "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
-            config.gradient
+            "h-12 w-12 rounded-xl flex items-center justify-center shadow-md",
+            config.bgColor
           )}>
             <Icon className="h-6 w-6 text-white" />
           </div>

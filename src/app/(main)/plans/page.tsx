@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
@@ -40,26 +40,26 @@ interface MealPlan {
   is_active: boolean
 }
 
-const mealConfig: Record<MealType, { icon: React.ElementType; gradient: string; bgGradient: string }> = {
+const mealConfig: Record<MealType, { icon: React.ElementType; bgColor: string; lightBg: string }> = {
   breakfast: {
     icon: Sun,
-    gradient: "from-amber-400 to-orange-500",
-    bgGradient: "from-amber-500/10 to-orange-500/5",
+    bgColor: "bg-amber-500",
+    lightBg: "bg-amber-500/10",
   },
   lunch: {
     icon: Utensils,
-    gradient: "from-emerald-400 to-teal-500",
-    bgGradient: "from-emerald-500/10 to-teal-500/5",
+    bgColor: "bg-primary",
+    lightBg: "bg-primary/10",
   },
   dinner: {
     icon: Moon,
-    gradient: "from-indigo-400 to-purple-500",
-    bgGradient: "from-indigo-500/10 to-purple-500/5",
+    bgColor: "bg-indigo-500",
+    lightBg: "bg-indigo-500/10",
   },
   snacks: {
     icon: Cookie,
-    gradient: "from-pink-400 to-rose-500",
-    bgGradient: "from-pink-500/10 to-rose-500/5",
+    bgColor: "bg-rose-500",
+    lightBg: "bg-rose-500/10",
   },
 }
 
@@ -188,27 +188,55 @@ export default function PlansPage() {
     }
   }
 
-  const getCurrentDayItems = (mealType: MealType): MealPlanItem[] => {
-    const day = planDays.find(d => d.day_of_week === selectedDay)
-    if (!day) return []
-    return day.items.filter(item => item.meal_type === mealType)
-  }
+  // Memoized current day data to avoid recalculating on every render
+  const currentDay = useMemo(() => {
+    return planDays.find(d => d.day_of_week === selectedDay)
+  }, [planDays, selectedDay])
 
-  const getCurrentDayId = (): string | null => {
-    const day = planDays.find(d => d.day_of_week === selectedDay)
-    return day?.id || null
-  }
+  const dayId = useMemo(() => currentDay?.id || null, [currentDay])
 
-  const getTotalCalories = (mealType: MealType): number => {
-    const items = getCurrentDayItems(mealType)
-    return items.reduce((sum, item) => {
-      let calories = 0
-      if (item.foods) calories = item.foods.calories
-      else if (item.user_foods) calories = item.user_foods.calories
-      else if (item.recipes) calories = item.recipes.calories_per_serving
-      return sum + (calories * item.servings)
-    }, 0)
-  }
+  // Memoized items grouped by meal type
+  const itemsByMealType = useMemo(() => {
+    if (!currentDay) return {} as Record<MealType, MealPlanItem[]>
+    const groups: Record<MealType, MealPlanItem[]> = {
+      breakfast: [],
+      lunch: [],
+      dinner: [],
+      snacks: [],
+    }
+    currentDay.items.forEach(item => {
+      groups[item.meal_type]?.push(item)
+    })
+    return groups
+  }, [currentDay])
+
+  // Memoized calorie totals for each meal type
+  const caloriesByMealType = useMemo(() => {
+    const totals: Record<MealType, number> = {
+      breakfast: 0,
+      lunch: 0,
+      dinner: 0,
+      snacks: 0,
+    }
+
+    for (const mealType of mealTypes) {
+      const items = itemsByMealType[mealType] || []
+      totals[mealType] = items.reduce((sum, item) => {
+        let calories = 0
+        if (item.foods) calories = item.foods.calories
+        else if (item.user_foods) calories = item.user_foods.calories
+        else if (item.recipes) calories = item.recipes.calories_per_serving
+        return sum + (calories * item.servings)
+      }, 0)
+    }
+
+    return totals
+  }, [itemsByMealType])
+
+  // Memoized daily total calories
+  const dailyTotalCalories = useMemo(() => {
+    return Object.values(caloriesByMealType).reduce((sum, cal) => sum + cal, 0)
+  }, [caloriesByMealType])
 
   if (isLoading) {
     return (
@@ -225,8 +253,6 @@ export default function PlansPage() {
       </div>
     )
   }
-
-  const dayId = getCurrentDayId()
 
   return (
     <div className="max-w-lg mx-auto pb-24">
@@ -262,8 +288,8 @@ export default function PlansPage() {
             {/* Meal Slots */}
             <div className="space-y-3">
               {mealTypes.map((mealType) => {
-                const items = getCurrentDayItems(mealType)
-                const totalCals = getTotalCalories(mealType)
+                const items = itemsByMealType[mealType] || []
+                const totalCals = caloriesByMealType[mealType]
                 const config = mealConfig[mealType]
                 const Icon = config.icon
 
@@ -274,8 +300,7 @@ export default function PlansPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className={cn(
                       "rounded-2xl overflow-hidden",
-                      "bg-gradient-to-br",
-                      config.bgGradient,
+                      config.lightBg,
                       "border border-border/40"
                     )}
                   >
@@ -283,8 +308,8 @@ export default function PlansPage() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
                           <div className={cn(
-                            "h-10 w-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md",
-                            config.gradient
+                            "h-10 w-10 rounded-xl flex items-center justify-center shadow-md",
+                            config.bgColor
                           )}>
                             <Icon className="h-5 w-5 text-white" />
                           </div>
@@ -302,9 +327,8 @@ export default function PlansPage() {
                             <motion.div
                               whileTap={{ scale: 0.9 }}
                               className={cn(
-                                "h-9 w-9 rounded-lg flex items-center justify-center",
-                                "bg-gradient-to-br shadow-sm",
-                                config.gradient
+                                "h-9 w-9 rounded-lg flex items-center justify-center shadow-sm",
+                                config.bgColor
                               )}
                             >
                               <Plus className="h-4 w-4 text-white" strokeWidth={2.5} />
@@ -409,7 +433,7 @@ export default function PlansPage() {
 
             {/* Daily Summary */}
             {planDays.length > 0 && (
-              <Card className="bg-gradient-to-br from-primary/10 to-emerald-500/5 border-primary/20">
+              <Card className="bg-primary/10 border-primary/20">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -418,7 +442,7 @@ export default function PlansPage() {
                     </div>
                     <div className="text-right">
                       <span className="text-2xl font-bold text-primary">
-                        {Math.round(mealTypes.reduce((sum, type) => sum + getTotalCalories(type), 0))}
+                        {Math.round(dailyTotalCalories)}
                       </span>
                       <span className="text-sm text-muted-foreground ml-1">cal</span>
                     </div>

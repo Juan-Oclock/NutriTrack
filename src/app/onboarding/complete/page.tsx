@@ -150,7 +150,7 @@ export default function CompletePage() {
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
           className="flex justify-center"
         >
-          <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/25">
+          <div className="h-24 w-24 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
             <CheckCircle className="h-12 w-12 text-white" />
           </div>
         </motion.div>
@@ -207,7 +207,7 @@ export default function CompletePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-emerald-500/20 border border-primary/30"
+          className="p-4 rounded-2xl bg-primary/10 border border-primary/30"
         >
           <div className="flex items-start gap-4">
             <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
@@ -316,7 +316,7 @@ export default function CompletePage() {
       >
         <Button
           size="lg"
-          className="w-full h-14 rounded-xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90"
+          className="w-full h-14 rounded-xl text-lg font-semibold bg-primary hover:bg-primary/90"
           onClick={() => router.push("/dashboard")}
         >
           Go to Dashboard

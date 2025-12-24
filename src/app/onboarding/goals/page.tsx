@@ -172,7 +172,7 @@ export default function GoalsPage() {
       >
         <h1 className="text-2xl font-bold text-white">
           Set your{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+          <span className="text-primary">
             goals
           </span>
         </h1>
@@ -188,7 +188,7 @@ export default function GoalsPage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Target className="h-3.5 w-3.5 text-white" />
             </div>
             What&apos;s your goal?
@@ -225,7 +225,7 @@ export default function GoalsPage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Activity className="h-3.5 w-3.5 text-white" />
             </div>
             Activity Level
@@ -260,7 +260,7 @@ export default function GoalsPage() {
             className="space-y-4"
           >
             <Label className="flex items-center gap-2 text-white">
-              <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+              <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
                 <Zap className="h-3.5 w-3.5 text-white" />
               </div>
               Weekly Goal
@@ -296,7 +296,7 @@ export default function GoalsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-gradient-to-br from-primary/20 to-emerald-500/10 rounded-2xl p-5 border border-primary/30"
+            className="bg-primary/10 rounded-2xl p-5 border border-primary/30"
           >
             <div className="flex items-center gap-2 mb-4">
               <Flame className="h-5 w-5 text-primary" />
@@ -333,7 +333,7 @@ export default function GoalsPage() {
           <Button
             type="submit"
             size="lg"
-            className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
+            className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
             disabled={isLoading || !goalType || !activityLevel}
           >
             {isLoading ? (

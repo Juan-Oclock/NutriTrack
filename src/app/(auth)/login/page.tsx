@@ -81,14 +81,14 @@ export default function LoginPage() {
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
             className="relative"
           >
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-xl shadow-primary/30">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/30">
               <Sparkles className="h-8 w-8 text-white" />
             </div>
           </motion.div>
         </div>
         <h1 className="text-2xl font-bold text-foreground">
           Welcome{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+          <span className="text-primary">
             back
           </span>
         </h1>
@@ -108,7 +108,7 @@ export default function LoginPage() {
         {/* Email Field */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2 text-foreground">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Mail className="h-3.5 w-3.5 text-white" />
             </div>
             Email
@@ -128,7 +128,7 @@ export default function LoginPage() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="flex items-center gap-2 text-foreground">
-              <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+              <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
                 <Lock className="h-3.5 w-3.5 text-white" />
               </div>
               Password
@@ -161,7 +161,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             size="lg"
-            className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
+            className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
             disabled={isLoading}
           >
             {isLoading ? (

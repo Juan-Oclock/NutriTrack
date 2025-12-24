@@ -32,7 +32,7 @@ export function LandingPage() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+              <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
                 <Leaf className="h-5 w-5 text-white" />
               </div>
               <span className="font-bold text-xl text-foreground">CalorieCue</span>
@@ -61,7 +61,7 @@ export function LandingPage() {
               <Button
                 size="sm"
                 onClick={() => scrollToSection('cta')}
-                className="bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90"
+                className="bg-primary hover:bg-primary/90"
               >
                 Sign Up Free
               </Button>
@@ -110,7 +110,7 @@ export function LandingPage() {
                   <Button
                     size="sm"
                     onClick={() => scrollToSection('cta')}
-                    className="flex-1 bg-gradient-to-r from-primary to-emerald-500"
+                    className="flex-1 bg-primary hover:bg-primary/90"
                   >
                     Sign Up
                   </Button>
@@ -138,7 +138,7 @@ export function LandingPage() {
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
               {/* Logo */}
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                   <Leaf className="h-4 w-4 text-white" />
                 </div>
                 <span className="font-semibold text-foreground">CalorieCue</span>

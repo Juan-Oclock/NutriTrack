@@ -55,7 +55,7 @@ export function FeaturesSection() {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
             Everything You Need to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">
+            <span className="text-primary">
               Succeed
             </span>
           </h2>

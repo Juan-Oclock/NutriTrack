@@ -94,7 +94,7 @@ export function SocialProofSection() {
   return (
     <section className="py-20 lg:py-32 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-muted/50 to-background" />
+      <div className="absolute inset-0 bg-muted/30" />
 
       <div className="container relative mx-auto px-4 max-w-7xl">
         {/* Stats */}
@@ -140,7 +140,7 @@ export function SocialProofSection() {
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground mb-4">
             Loved by{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">
+            <span className="text-primary">
               Thousands
             </span>
           </h2>

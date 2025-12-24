@@ -37,27 +37,18 @@ export const CalorieRing = memo(function CalorieRing({
     <div className={cn("relative inline-flex items-center justify-center", className)}>
       {/* Outer glow effect */}
       <div
-        className="absolute rounded-full opacity-30 blur-xl"
+        className={cn(
+          "absolute rounded-full opacity-20 blur-xl",
+          isOver ? "bg-destructive" : "bg-primary"
+        )}
         style={{
           width: size + 40,
           height: size + 40,
-          background: isOver
-            ? 'radial-gradient(circle, hsl(var(--destructive)) 0%, transparent 70%)'
-            : 'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
         }}
       />
 
       <svg width={size} height={size} className="transform -rotate-90">
         <defs>
-          <linearGradient id="calorieGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(153 70% 50%)" />
-            <stop offset="50%" stopColor="hsl(153 60% 45%)" />
-            <stop offset="100%" stopColor="hsl(160 65% 40%)" />
-          </linearGradient>
-          <linearGradient id="overGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="hsl(0 72% 55%)" />
-            <stop offset="100%" stopColor="hsl(20 80% 50%)" />
-          </linearGradient>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="4" result="coloredBlur" />
             <feMerge>
@@ -88,7 +79,7 @@ export const CalorieRing = memo(function CalorieRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={isOver ? "url(#overGradient)" : "url(#calorieGradient)"}
+          stroke={isOver ? "hsl(var(--destructive))" : "hsl(var(--primary))"}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}

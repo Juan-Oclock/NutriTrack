@@ -100,7 +100,7 @@ export default function ProfilePage() {
       >
         <h1 className="text-2xl font-bold text-white">
           Tell us about{" "}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">
+          <span className="text-primary">
             yourself
           </span>
         </h1>
@@ -118,7 +118,7 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <User className="h-3.5 w-3.5 text-white" />
             </div>
             Gender
@@ -150,7 +150,7 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Calendar className="h-3.5 w-3.5 text-white" />
             </div>
             Date of Birth
@@ -173,7 +173,7 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Ruler className="h-3.5 w-3.5 text-white" />
             </div>
             Height
@@ -186,7 +186,7 @@ export default function ProfilePage() {
               onClick={() => setHeightUnit("imperial")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 heightUnit === "imperial"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-primary text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -197,7 +197,7 @@ export default function ProfilePage() {
               onClick={() => setHeightUnit("metric")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 heightUnit === "metric"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  ? "bg-primary text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -256,7 +256,7 @@ export default function ProfilePage() {
           className="space-y-3"
         >
           <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
               <Scale className="h-3.5 w-3.5 text-white" />
             </div>
             Current Weight
@@ -269,7 +269,7 @@ export default function ProfilePage() {
               onClick={() => setWeightUnit("imperial")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 weightUnit === "imperial"
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
+                  ? "bg-primary text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -280,7 +280,7 @@ export default function ProfilePage() {
               onClick={() => setWeightUnit("metric")}
               className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
                 weightUnit === "metric"
-                  ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg"
+                  ? "bg-primary text-white shadow-lg"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -331,7 +331,7 @@ export default function ProfilePage() {
           <Button
             type="submit"
             size="lg"
-            className="w-full h-14 rounded-2xl text-lg font-semibold bg-gradient-to-r from-primary to-emerald-500 hover:from-primary/90 hover:to-emerald-500/90 shadow-lg shadow-primary/25 group"
+            className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
             disabled={isLoading || !gender || !dateOfBirth}
           >
             {isLoading ? (

@@ -21,11 +21,11 @@ export default function OnboardingLayout({
   const showProgress = pathname !== "/onboarding/welcome" && pathname !== "/onboarding/complete"
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl" />
       </div>
 
       <div className="container max-w-lg mx-auto px-4 py-6 relative z-10">
@@ -35,7 +35,7 @@ export default function OnboardingLayout({
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-center mb-8"
         >
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/25 glow-primary">
+          <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25 glow-primary">
             <Leaf className="h-6 w-6 text-white" />
           </div>
           <span className="ml-3 text-2xl font-bold text-white tracking-tight">CalorieCue</span>
@@ -64,7 +64,7 @@ export default function OnboardingLayout({
                           isComplete
                             ? "bg-primary text-white shadow-lg shadow-primary/25"
                             : isCurrent
-                            ? "bg-gradient-to-br from-primary to-emerald-500 text-white shadow-lg shadow-primary/25 ring-4 ring-primary/20"
+                            ? "bg-primary text-white shadow-lg shadow-primary/25 ring-4 ring-primary/20"
                             : "bg-slate-800/80 text-slate-500 border border-slate-700"
                         }`}
                       >

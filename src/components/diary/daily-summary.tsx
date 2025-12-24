@@ -31,7 +31,7 @@ export function DailySummary({
       goal: protein.goal,
       ringColor: "stroke-rose-500",
       textColor: "text-rose-500",
-      bgGradient: "from-rose-500/20 to-rose-400/10",
+      bgColor: "bg-rose-500/10",
     },
     {
       label: "Carbs",
@@ -40,7 +40,7 @@ export function DailySummary({
       goal: carbs.goal,
       ringColor: "stroke-blue-500",
       textColor: "text-blue-500",
-      bgGradient: "from-blue-500/20 to-blue-400/10",
+      bgColor: "bg-blue-500/10",
     },
     {
       label: "Fat",
@@ -49,12 +49,12 @@ export function DailySummary({
       goal: fat.goal,
       ringColor: "stroke-amber-500",
       textColor: "text-amber-500",
-      bgGradient: "from-amber-500/20 to-amber-400/10",
+      bgColor: "bg-amber-500/10",
     },
   ]
 
   return (
-    <div className={cn("bg-gradient-to-b from-card to-card/80 p-5", className)}>
+    <div className={cn("bg-card p-5", className)}>
       {/* Calories Section */}
       <div className="flex items-center gap-4">
         {/* Mini calorie ring */}
@@ -132,8 +132,7 @@ export function DailySummary({
               transition={{ delay: 0.1 + index * 0.05 }}
               className={cn(
                 "flex-1 flex flex-col items-center p-2.5 rounded-xl",
-                "bg-gradient-to-b",
-                macro.bgGradient
+                macro.bgColor
               )}
             >
               {/* Mini ring */}

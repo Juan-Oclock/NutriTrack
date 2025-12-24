@@ -51,7 +51,7 @@ export function TestimonialCard({
       {/* Author */}
       <div className="flex items-center gap-3">
         {/* Avatar placeholder */}
-        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center text-white font-semibold text-sm">
+        <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm">
           {name.split(' ').map(n => n[0]).join('')}
         </div>
         <div>

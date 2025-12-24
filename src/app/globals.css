@@ -208,12 +208,9 @@ input[type="number"] {
   padding-top: env(safe-area-inset-top);
 }
 
-/* Gradient text utility */
-.text-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.7));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Primary text color utility */
+.text-primary-accent {
+  color: hsl(var(--primary));
 }
 
 /* Subtle glow for primary elements */
@@ -257,7 +254,7 @@ input[type="number"] {
   display: none;
 }
 
-/* Ring progress gradient support */
-.ring-gradient {
-  stroke: url(#primaryGradient);
+/* Ring progress support */
+.ring-primary {
+  stroke: hsl(var(--primary));
 }
