@@ -268,7 +268,7 @@ export default function CreateRecipePage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto pb-40">
+    <div className="max-w-lg mx-auto pb-44">
       <Header title="Create Recipe" showBack />
 
       <div className="p-4">
@@ -553,7 +553,7 @@ export default function CreateRecipePage() {
           </div>
 
           {/* Submit Button - Fixed above bottom nav */}
-          <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40">
+          <div className="fixed bottom-24 left-0 right-0 px-4 z-40">
             <div className="max-w-lg mx-auto">
               <Button
                 type="submit"
