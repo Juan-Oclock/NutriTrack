@@ -43,8 +43,6 @@ async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
     return { success: false, error: "Gemini API key not configured" }
   }
 
-  console.log("Attempting Gemini analysis with model gemini-2.0-flash")
-
   try {
     const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
       method: "POST",
@@ -123,8 +121,6 @@ async function analyzeWithLogMeal(base64Image: string): Promise<AnalysisResult> 
     console.error("LOGMEAL_API_KEY not found in environment")
     return { success: false, error: "LogMeal API key not configured" }
   }
-
-  console.log("Attempting LogMeal analysis as fallback")
 
   try {
     // Convert base64 to blob for LogMeal
@@ -311,12 +307,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Try Google Gemini first (primary)
-    console.log("Starting meal analysis...")
     const geminiResult = await analyzeWithGemini(base64Image)
 
     if (geminiResult.success && geminiResult.foods) {
-      console.log("Gemini analysis successful, found", geminiResult.foods.length, "foods")
-
       // Save to meal_scans for history/caching
       const scanId = await saveMealScan(geminiResult.foods, image)
 
@@ -330,15 +323,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log("Gemini failed:", geminiResult.error || "Unknown error")
-
     // If Gemini rate limited or failed, try LogMeal fallback
     if (geminiResult.rateLimited || !geminiResult.success) {
       const logmealResult = await analyzeWithLogMeal(base64Image)
 
       if (logmealResult.success && logmealResult.foods) {
-        console.log("LogMeal analysis successful, found", logmealResult.foods.length, "foods")
-
         // Save to meal_scans for history/caching
         const scanId = await saveMealScan(logmealResult.foods, image)
 
@@ -351,8 +340,6 @@ export async function POST(request: NextRequest) {
           }
         )
       }
-
-      console.log("LogMeal failed:", logmealResult.error || "Unknown error")
 
       // If LogMeal also rate limited
       if (logmealResult.rateLimited) {
