@@ -29,32 +29,10 @@ const LOGMEAL_NUTRITION_URL = "https://api.logmeal.com/v2/recipe/nutritionalInfo
 // Max image size: 5MB in base64 (roughly 6.6MB encoded)
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
-const NUTRITION_PROMPT = `Analyze this food image and identify all visible food items.
-For each food item, provide:
-- name: Name of the food
-- portion: Estimated portion size (e.g., "1 cup", "150g", "1 medium")
-- calories: Estimated calories (number)
-- protein: Protein in grams (number)
-- carbs: Carbohydrates in grams (number)
-- fat: Fat in grams (number)
-- confidence: Your confidence level 0.0-1.0 (number)
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "foods": [
-    {
-      "name": "Food Name",
-      "portion": "portion size",
-      "calories": 200,
-      "protein": 10,
-      "carbs": 25,
-      "fat": 8,
-      "confidence": 0.85
-    }
-  ]
-}
-
-Be accurate with nutritional estimates based on visible portion sizes.`
+// Optimized prompt - reduced tokens while maintaining accuracy
+const NUTRITION_PROMPT = `Identify all foods in this image. Return JSON only:
+{"foods":[{"name":"string","portion":"string","calories":number,"protein":number,"carbs":number,"fat":number,"confidence":0.0-1.0}]}
+Estimate nutrition per visible portion. Be accurate.`
 
 // Primary: Google Gemini
 async function analyzeWithGemini(base64Image: string): Promise<AnalysisResult> {
@@ -300,14 +278,50 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Helper function to save scan results to database
+    async function saveMealScan(foods: DetectedFood[], imageData: string) {
+      try {
+        const totalCalories = foods.reduce((sum, food) => sum + (food.calories || 0), 0)
+        const mealName = foods.length === 1
+          ? foods[0].name
+          : `${foods[0].name} + ${foods.length - 1} more`
+
+        const { data: scanData, error: scanError } = await supabase
+          .from("meal_scans")
+          .insert({
+            user_id: user!.id,
+            image_url: imageData.substring(0, 500), // Store truncated for reference
+            detected_foods: foods,
+            total_calories: totalCalories,
+            meal_name: mealName,
+            scan_date: new Date().toISOString(),
+          } as never)
+          .select("id")
+          .single()
+
+        if (scanError) {
+          console.error("Error saving meal scan:", scanError)
+          return null
+        }
+        return (scanData as { id: string } | null)?.id
+      } catch (err) {
+        console.error("Error saving meal scan:", err)
+        return null
+      }
+    }
+
     // Try Google Gemini first (primary)
     console.log("Starting meal analysis...")
     const geminiResult = await analyzeWithGemini(base64Image)
 
     if (geminiResult.success && geminiResult.foods) {
       console.log("Gemini analysis successful, found", geminiResult.foods.length, "foods")
+
+      // Save to meal_scans for history/caching
+      const scanId = await saveMealScan(geminiResult.foods, image)
+
       return NextResponse.json(
-        { foods: geminiResult.foods },
+        { foods: geminiResult.foods, scanId },
         {
           headers: {
             "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
@@ -324,8 +338,12 @@ export async function POST(request: NextRequest) {
 
       if (logmealResult.success && logmealResult.foods) {
         console.log("LogMeal analysis successful, found", logmealResult.foods.length, "foods")
+
+        // Save to meal_scans for history/caching
+        const scanId = await saveMealScan(logmealResult.foods, image)
+
         return NextResponse.json(
-          { foods: logmealResult.foods },
+          { foods: logmealResult.foods, scanId },
           {
             headers: {
               "X-RateLimit-Remaining": rateLimitResult.remaining.toString(),
