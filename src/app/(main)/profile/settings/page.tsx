@@ -5,10 +5,11 @@ import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Switch } from "@/components/ui/switch"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate, Download, Share, X } from "lucide-react"
+import { Bell, Scale, Droplets, Timer, Smartphone, ChevronRight, Vibrate, Download, Share, X, Utensils, BellOff } from "lucide-react"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
+import { useMealReminders } from "@/hooks/use-meal-reminders"
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -41,6 +42,24 @@ export default function SettingsPage() {
   const [isIOS, setIsIOS] = useState(false)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
   const supabase = createClient()
+
+  const {
+    isEnabled: mealRemindersEnabled,
+    permissionStatus,
+    toggleReminders,
+    isLoading: mealRemindersLoading,
+  } = useMealReminders()
+
+  const handleMealRemindersToggle = async () => {
+    const newValue = await toggleReminders()
+    if (newValue) {
+      toast.success("Meal reminders enabled")
+    } else if (permissionStatus === "denied") {
+      toast.error("Notifications are blocked. Please enable them in your browser settings.")
+    } else {
+      toast.success("Meal reminders disabled")
+    }
+  }
 
   useEffect(() => {
     async function loadSettings() {
@@ -176,6 +195,31 @@ export default function SettingsPage() {
                 onCheckedChange={(v) => updateSetting("notifications_enabled", v)}
               />
             }
+          />
+
+          <SettingRow
+            icon={Utensils}
+            label="Meal Reminders"
+            description={
+              permissionStatus === "denied"
+                ? "Notifications blocked in browser"
+                : "Get reminded when it's time to log"
+            }
+            action={
+              permissionStatus === "denied" ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <BellOff className="h-4 w-4" />
+                  <span className="text-xs">Blocked</span>
+                </div>
+              ) : (
+                <Switch
+                  checked={mealRemindersEnabled}
+                  onCheckedChange={handleMealRemindersToggle}
+                  disabled={mealRemindersLoading}
+                />
+              )
+            }
+            border
           />
 
           <SettingRow

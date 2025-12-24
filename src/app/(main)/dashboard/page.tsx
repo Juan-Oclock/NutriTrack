@@ -12,6 +12,7 @@ import { formatDiaryDate, toDateString } from "@/lib/utils/date"
 import { ChevronRight, TrendingDown, Scale, BookOpen, ChartBar, Sun, Moon } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import type { Profile, NutritionGoal, UserStreak } from "@/types/database"
 
 interface DailySummary {
@@ -166,18 +167,21 @@ export default function DashboardPage() {
           </h1>
         </div>
         {mounted && (
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="h-10 w-10 rounded-xl bg-card elevation-1 flex items-center justify-center tap-highlight"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5 text-amber-500" />
-            ) : (
-              <Moon className="h-5 w-5 text-slate-600" />
-            )}
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="h-10 w-10 rounded-xl bg-card elevation-1 flex items-center justify-center tap-highlight"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5 text-amber-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-slate-600" />
+              )}
+            </motion.button>
+          </div>
         )}
       </motion.div>
 

@@ -707,6 +707,64 @@ export interface Database {
           updated_at?: string
         }
       }
+      user_settings: {
+        Row: {
+          id: string
+          user_id: string
+          meal_reminders_enabled: boolean
+          notifications_permission_granted: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          meal_reminders_enabled?: boolean
+          notifications_permission_granted?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          meal_reminders_enabled?: boolean
+          notifications_permission_granted?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: "app_update" | "meal_reminder" | "system"
+          title: string
+          message: string
+          is_read: boolean
+          action_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: "app_update" | "meal_reminder" | "system"
+          title: string
+          message: string
+          is_read?: boolean
+          action_url?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: "app_update" | "meal_reminder" | "system"
+          title?: string
+          message?: string
+          is_read?: boolean
+          action_url?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -748,5 +806,8 @@ export type WeightLog = Tables<"weight_logs">
 export type MealScan = Tables<"meal_scans">
 export type UserStreak = Tables<"user_streaks">
 export type FoodServingOption = Tables<"food_serving_options">
+export type UserSettings = Tables<"user_settings">
+export type Notification = Tables<"notifications">
 
 export type MealType = "breakfast" | "lunch" | "dinner" | "snacks"
+export type NotificationType = "app_update" | "meal_reminder" | "system"
