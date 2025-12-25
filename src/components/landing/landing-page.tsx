@@ -8,23 +8,30 @@ import { FeaturesSection } from "./features-section"
 import { BenefitsSection } from "./benefits-section"
 import { SocialProofSection } from "./social-proof-section"
 import { CTASection } from "./cta-section"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useLayoutEffect } from "react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
 
+// Check if running as PWA (works on both client and during hydration)
+function getIsStandalone() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(display-mode: standalone)').matches
+    || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+}
+
 export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [safeAreaTop, setSafeAreaTop] = useState('env(safe-area-inset-top, 0px)')
+  const [isStandalone, setIsStandalone] = useState(false)
 
-  useEffect(() => {
-    // Detect if running as installed PWA and apply fallback
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
-
-    if (isStandalone) {
-      setSafeAreaTop('max(env(safe-area-inset-top, 47px), 47px)')
-    }
+  // Use useLayoutEffect to detect PWA mode before paint
+  useLayoutEffect(() => {
+    setIsStandalone(getIsStandalone())
   }, [])
+
+  // Calculate safe area based on standalone mode
+  const safeAreaTop = isStandalone
+    ? 'max(env(safe-area-inset-top, 47px), 47px)'
+    : 'env(safe-area-inset-top, 0px)'
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
