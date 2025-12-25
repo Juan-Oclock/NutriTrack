@@ -50,33 +50,60 @@ export default function GoalsPage() {
     date_of_birth: string
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [profileLoading, setProfileLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
 
   useEffect(() => {
     async function loadProfile() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("height_cm, current_weight_kg, gender, date_of_birth")
-        .eq("id", user.id)
-        .single()
-
-      if (data) {
-        const profileData = data as {
-          height_cm: number
-          current_weight_kg: number
-          gender: Gender
-          date_of_birth: string
+      setProfileLoading(true)
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          toast.error("You must be logged in")
+          router.push("/login")
+          return
         }
-        setProfile(profileData)
-        setTargetWeight(profileData.current_weight_kg?.toString() || "")
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("height_cm, current_weight_kg, gender, date_of_birth")
+          .eq("id", user.id)
+          .single()
+
+        if (error) {
+          console.error("Error loading profile:", error)
+          toast.error("Failed to load profile data")
+          return
+        }
+
+        if (data) {
+          const profileData = data as {
+            height_cm: number
+            current_weight_kg: number
+            gender: Gender
+            date_of_birth: string
+          }
+
+          // Check if profile has required fields
+          if (!profileData.height_cm || !profileData.current_weight_kg || !profileData.date_of_birth) {
+            toast.error("Please complete your profile first")
+            router.push("/onboarding/profile")
+            return
+          }
+
+          setProfile(profileData)
+          setTargetWeight(profileData.current_weight_kg?.toString() || "")
+        }
+      } catch (error) {
+        console.error("Error loading profile:", error)
+        toast.error("An error occurred loading your profile")
+      } finally {
+        setProfileLoading(false)
       }
     }
     loadProfile()
-  }, [supabase])
+  }, [supabase, router])
 
   useEffect(() => {
     if (profile && goalType && activityLevel) {
@@ -357,9 +384,9 @@ export default function GoalsPage() {
             type="submit"
             size="lg"
             className="w-full h-14 rounded-2xl text-lg font-semibold shadow-lg shadow-primary/25 group"
-            disabled={isLoading || !goalType || !activityLevel}
+            disabled={isLoading || profileLoading || !goalType || !activityLevel || !calculatedGoals}
           >
-            {isLoading ? (
+            {isLoading || profileLoading ? (
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             ) : (
               <>
@@ -368,6 +395,11 @@ export default function GoalsPage() {
               </>
             )}
           </Button>
+          {!profileLoading && goalType && activityLevel && !calculatedGoals && (
+            <p className="text-center text-sm text-destructive mt-2">
+              Unable to calculate goals. Please complete your profile first.
+            </p>
+          )}
         </motion.div>
       </form>
     </motion.div>
