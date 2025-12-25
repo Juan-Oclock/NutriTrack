@@ -52,14 +52,14 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-lg mx-auto pb-24">
-      {/* Sticky Header */}
+      {/* Fixed Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="sticky z-40 bg-background/80 backdrop-blur-lg border-b border-border/50"
+        className="fixed left-0 right-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50"
         style={{ top: 'env(safe-area-inset-top, 0px)' }}
       >
-        <div className="flex items-end justify-between px-4 py-3">
+        <div className="flex items-end justify-between px-4 py-3 max-w-lg mx-auto">
           <div>
             <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -86,7 +86,11 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      <div className="p-4 space-y-5">
+      {/* Content with top padding to account for fixed header */}
+      <div
+        className="p-4 space-y-5"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4.5rem)' }}
+      >
 
       {/* Main Calorie Card */}
       <motion.div
