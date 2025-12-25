@@ -27,6 +27,13 @@ export function useServingOptions({
       return
     }
 
+    // Skip fetching for non-UUID IDs (like USDA food IDs "usda_12345")
+    const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    if ((foodId && !isValidUUID(foodId)) || (userFoodId && !isValidUUID(userFoodId))) {
+      setOptions([])
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
