@@ -49,8 +49,20 @@ export function useServingOptions({
 
       setOptions(data || [])
     } catch (err) {
-      setError(err instanceof Error ? err : new Error("Failed to fetch serving options"))
-      console.error("Serving options error:", err)
+      // Handle Supabase PostgrestError which has code, message, details, hint properties
+      const errorMessage = err && typeof err === 'object' && 'message' in err
+        ? (err as { message: string }).message
+        : "Failed to fetch serving options"
+      const errorCode = err && typeof err === 'object' && 'code' in err
+        ? (err as { code: string }).code
+        : undefined
+
+      setError(new Error(errorMessage))
+
+      // Only log actual errors, not "no rows" cases
+      if (errorCode !== 'PGRST116') {
+        console.error("Serving options error:", errorMessage, errorCode ? `(code: ${errorCode})` : "")
+      }
     } finally {
       setIsLoading(false)
     }
