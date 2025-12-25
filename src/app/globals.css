@@ -2,66 +2,101 @@
 
 @layer base {
   :root {
-    --background: 220 14% 97.5%;
-    --foreground: 240 10% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
-    --primary: 153 60% 45%;
+    /* Backgrounds & Surfaces - Warm cream */
+    --background: 35 30% 94%;
+    --foreground: 25 15% 12%;
+    --card: 40 20% 99%;
+    --card-foreground: 25 15% 12%;
+    --popover: 40 20% 99%;
+    --popover-foreground: 25 15% 12%;
+
+    /* Primary - Warm coral */
+    --primary: 16 85% 58%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 240 10% 10%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 220 14% 96%;
-    --accent-foreground: 240 10% 10%;
-    --destructive: 0 72% 51%;
+
+    /* Secondary & Muted - Warm sand tones */
+    --secondary: 30 15% 92%;
+    --secondary-foreground: 25 15% 15%;
+    --muted: 30 12% 90%;
+    --muted-foreground: 25 8% 45%;
+    --accent: 30 20% 94%;
+    --accent-foreground: 25 15% 12%;
+
+    /* Semantic */
+    --destructive: 4 78% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 87%;
-    --input: 220 13% 91%;
-    --ring: 153 60% 45%;
+
+    /* Borders & Inputs - More visible */
+    --border: 30 15% 82%;
+    --input: 30 12% 85%;
+    --ring: 16 85% 58%;
     --radius: 1rem;
 
-    /* Macro colors - vibrant but balanced */
-    --protein: 350 80% 60%;
-    --carbs: 220 85% 60%;
-    --fat: 45 93% 55%;
+    /* Macro colors - Refined to complement coral */
+    --protein: 350 72% 56%;
+    --carbs: 215 75% 55%;
+    --fat: 38 92% 50%;
 
     /* Chart colors */
-    --chart-1: 153 60% 45%;
-    --chart-2: 220 85% 60%;
-    --chart-3: 45 93% 55%;
-    --chart-4: 350 80% 60%;
-    --chart-5: 280 70% 60%;
+    --chart-1: 16 85% 58%;
+    --chart-2: 215 75% 55%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 350 72% 56%;
+    --chart-5: 280 60% 55%;
+
+    /* Elevation surfaces */
+    --surface-1: 40 20% 99%;
+    --surface-2: 35 25% 97%;
+    --surface-3: 30 20% 95%;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-    --card: 240 6% 10%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 6% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 153 70% 50%;
-    --primary-foreground: 153 80% 10%;
-    --secondary: 240 5% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 5% 15%;
-    --muted-foreground: 240 5% 55%;
-    --accent: 240 5% 18%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 72% 51%;
+    /* Backgrounds & Surfaces - Warm dark */
+    --background: 25 15% 7%;
+    --foreground: 35 15% 95%;
+    --card: 25 12% 12%;
+    --card-foreground: 35 15% 95%;
+    --popover: 25 12% 12%;
+    --popover-foreground: 35 15% 95%;
+
+    /* Primary - Brighter coral for dark mode */
+    --primary: 16 90% 62%;
+    --primary-foreground: 25 20% 10%;
+
+    /* Secondary & Muted */
+    --secondary: 25 10% 16%;
+    --secondary-foreground: 35 15% 95%;
+    --muted: 25 8% 18%;
+    --muted-foreground: 30 8% 55%;
+    --accent: 25 10% 18%;
+    --accent-foreground: 35 15% 95%;
+
+    /* Semantic */
+    --destructive: 4 78% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 240 5% 18%;
-    --input: 240 5% 18%;
-    --ring: 153 70% 50%;
+
+    /* Borders & Inputs */
+    --border: 25 10% 22%;
+    --input: 25 10% 22%;
+    --ring: 16 90% 62%;
+
+    /* Macro colors - Slightly brighter for dark */
+    --protein: 350 72% 60%;
+    --carbs: 215 75% 60%;
+    --fat: 38 92% 55%;
+
+    /* Chart colors - Dark mode */
+    --chart-1: 16 90% 62%;
+    --chart-2: 215 75% 60%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 350 72% 60%;
+    --chart-5: 280 60% 60%;
 
     /* Elevated surfaces for depth */
-    --card-elevated: 240 6% 13%;
-    --surface-1: 240 6% 8%;
-    --surface-2: 240 6% 12%;
-    --surface-3: 240 6% 16%;
+    --card-elevated: 25 12% 15%;
+    --surface-1: 25 12% 10%;
+    --surface-2: 25 12% 13%;
+    --surface-3: 25 12% 17%;
   }
 }
 
@@ -213,35 +248,55 @@ input[type="number"] {
   color: hsl(var(--primary));
 }
 
-/* Subtle glow for primary elements */
+/* Subtle glow for primary elements - Coral */
 .glow-primary {
-  box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  box-shadow: 0 0 24px hsl(16 85% 58% / 0.35);
 }
 
-/* Card depth levels */
+.dark .glow-primary {
+  box-shadow: 0 0 28px hsl(16 90% 62% / 0.4);
+}
+
+/* Card depth levels - Warm shadows for light mode */
 .elevation-1 {
-  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.08), 0 1px 2px hsl(0 0% 0% / 0.06);
+  box-shadow:
+    0 1px 2px hsl(25 15% 20% / 0.04),
+    0 2px 4px hsl(25 15% 20% / 0.06);
 }
 
 .elevation-2 {
-  box-shadow: 0 4px 6px hsl(0 0% 0% / 0.1), 0 2px 4px hsl(0 0% 0% / 0.06);
+  box-shadow:
+    0 2px 4px hsl(25 15% 20% / 0.04),
+    0 4px 8px hsl(25 15% 20% / 0.08),
+    0 8px 16px hsl(25 15% 20% / 0.04);
 }
 
 .elevation-3 {
-  box-shadow: 0 10px 15px hsl(0 0% 0% / 0.1), 0 4px 6px hsl(0 0% 0% / 0.05);
+  box-shadow:
+    0 4px 8px hsl(25 15% 20% / 0.06),
+    0 12px 24px hsl(25 15% 20% / 0.10),
+    0 24px 48px hsl(25 15% 20% / 0.06);
 }
 
-/* Dark mode specific shadows */
+/* Dark mode shadows - More dramatic */
 .dark .elevation-1 {
-  box-shadow: 0 1px 3px hsl(0 0% 0% / 0.4);
+  box-shadow:
+    0 1px 2px hsl(0 0% 0% / 0.3),
+    0 2px 4px hsl(0 0% 0% / 0.2);
 }
 
 .dark .elevation-2 {
-  box-shadow: 0 4px 6px hsl(0 0% 0% / 0.4), 0 2px 4px hsl(0 0% 0% / 0.3);
+  box-shadow:
+    0 2px 4px hsl(0 0% 0% / 0.3),
+    0 4px 8px hsl(0 0% 0% / 0.3),
+    0 8px 16px hsl(0 0% 0% / 0.2);
 }
 
 .dark .elevation-3 {
-  box-shadow: 0 10px 15px hsl(0 0% 0% / 0.4), 0 4px 6px hsl(0 0% 0% / 0.3);
+  box-shadow:
+    0 4px 8px hsl(0 0% 0% / 0.4),
+    0 12px 24px hsl(0 0% 0% / 0.4),
+    0 24px 48px hsl(0 0% 0% / 0.3);
 }
 
 /* Hide scrollbar but keep functionality */
