@@ -1,7 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useMemo } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useMemo } from "react"
 import { DateSelector } from "@/components/diary/date-selector"
 import { DailySummary } from "@/components/diary/daily-summary"
 import { MealSection } from "@/components/diary/meal-section"
@@ -11,22 +10,9 @@ import { toDateString, getDefaultMealType } from "@/lib/utils/date"
 import { toast } from "sonner"
 import { Sun, Utensils, Moon, Cookie } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import type { QuickAddEntry, NutritionGoal, MealType } from "@/types/database"
-
-// Extended type for diary entries with joined food data
-interface DiaryEntryWithFood {
-  id: string
-  meal_type: MealType
-  logged_at: string
-  logged_calories: number
-  logged_protein_g: number | null
-  logged_carbs_g: number | null
-  logged_fat_g: number | null
-  servings: number
-  foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
-  user_foods: { name: string; brand: string | null; serving_size: number; serving_unit: string } | null
-  recipes: { name: string } | null
-}
+import { useDiaryData, type DiaryEntryWithFood } from "@/hooks/use-diary-data"
+import { useUserId } from "@/hooks/use-user"
+import type { QuickAddEntry, MealType } from "@/types/database"
 
 const mealTypes: MealType[] = ["breakfast", "lunch", "dinner", "snacks"]
 
@@ -40,87 +26,28 @@ const mealOptions: { value: MealType; label: string; icon: React.ReactNode }[] =
 export default function DiaryPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [selectedMeal, setSelectedMeal] = useState<MealType>(getDefaultMealType)
-  const [diaryEntries, setDiaryEntries] = useState<DiaryEntryWithFood[]>([])
-  const [quickAddEntries, setQuickAddEntries] = useState<QuickAddEntry[]>([])
-  const [goals, setGoals] = useState<NutritionGoal | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
+  const { userId, isLoading: isUserLoading } = useUserId()
 
-  const loadDiaryData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const dateStr = toDateString(selectedDate)
-
-      // Fetch all data in parallel for better performance
-      const [
-        { data: diaryData },
-        { data: quickAddData },
-        { data: goalsData }
-      ] = await Promise.all([
-        supabase
-          .from("diary_entries")
-          .select(`
-            id, meal_type, logged_at, logged_calories, logged_protein_g, logged_carbs_g, logged_fat_g, servings,
-            foods (name, brand, serving_size, serving_unit),
-            user_foods (name, brand, serving_size, serving_unit),
-            recipes (name)
-          `)
-          .eq("user_id", user.id)
-          .eq("date", dateStr)
-          .order("logged_at", { ascending: true }),
-        supabase
-          .from("quick_add_entries")
-          .select("id, meal_type, created_at, calories, protein_g, carbs_g, fat_g, description")
-          .eq("user_id", user.id)
-          .eq("date", dateStr)
-          .order("created_at", { ascending: true }),
-        supabase
-          .from("nutrition_goals")
-          .select("calories_goal, protein_goal_g, carbs_goal_g, fat_goal_g")
-          .eq("user_id", user.id)
-          .eq("is_active", true)
-          .single()
-      ])
-
-      if (diaryData) setDiaryEntries(diaryData as DiaryEntryWithFood[])
-      if (quickAddData) setQuickAddEntries(quickAddData as QuickAddEntry[])
-      if (goalsData) setGoals(goalsData as NutritionGoal)
-    } catch (error) {
-      console.error("Error loading diary:", error)
-      toast.error("Failed to load diary entries")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [selectedDate, supabase])
-
-  useEffect(() => {
-    loadDiaryData()
-  }, [loadDiaryData])
+  const {
+    diaryEntries,
+    quickAddEntries,
+    goals,
+    isLoading,
+    isFetching,
+    deleteEntry,
+  } = useDiaryData(userId, selectedDate)
 
   const handleDeleteEntry = async (id: string, isQuickAdd: boolean) => {
-    try {
-      const table = isQuickAdd ? "quick_add_entries" : "diary_entries"
-      const { error } = await supabase.from(table).delete().eq("id", id)
-
-      if (error) throw error
-
-      if (isQuickAdd) {
-        setQuickAddEntries((prev) => prev.filter((e) => e.id !== id))
-      } else {
-        setDiaryEntries((prev) => prev.filter((e) => e.id !== id))
+    deleteEntry(
+      { id, isQuickAdd },
+      {
+        onSuccess: () => toast.success("Entry deleted"),
+        onError: () => toast.error("Failed to delete entry"),
       }
-
-      toast.success("Entry deleted")
-    } catch (error) {
-      console.error("Error deleting entry:", error)
-      toast.error("Failed to delete entry")
-    }
+    )
   }
 
-  // Memoize totals calculation to avoid recalculating on every render
+  // Memoize totals calculation
   const totals = useMemo(() => {
     const result = { calories: 0, protein: 0, carbs: 0, fat: 0 }
 
@@ -162,10 +89,13 @@ export default function DiaryPage() {
     }, 0) || 0
   }, [entriesByMeal, selectedMeal])
 
-  if (isLoading) {
+  // Show skeleton only on initial load (no cached data yet)
+  const showInitialSkeleton = isUserLoading || (isLoading && diaryEntries.length === 0 && quickAddEntries.length === 0)
+
+  if (showInitialSkeleton) {
     return (
       <div className="max-w-lg mx-auto pb-24">
-        <Skeleton className="h-[120px] w-full" />
+        <Skeleton className="h-[140px] w-full" />
         <Skeleton className="h-[100px] w-full" />
         <div className="p-4 space-y-3">
           <Skeleton className="h-[48px] w-full rounded-xl" />
@@ -180,6 +110,7 @@ export default function DiaryPage() {
       <DateSelector
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
+        isFetching={isFetching}
       />
 
       <DailySummary
