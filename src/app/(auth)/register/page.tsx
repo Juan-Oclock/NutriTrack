@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Loader2, Mail, Lock, User, ArrowRight, Rocket } from "lucide-react"
+import { Loader2, Mail, Lock, User, ArrowRight, Rocket, CheckCircle, MailOpen } from "lucide-react"
 import { toast } from "sonner"
 import { motion } from "framer-motion"
 
@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -52,13 +53,134 @@ export default function RegisterPage() {
         return
       }
 
-      toast.success("Account created! Please check your email to verify.")
-      router.push("/onboarding/welcome")
+      // Show email confirmation screen instead of redirecting
+      setShowEmailConfirmation(true)
     } catch {
       toast.error("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Email confirmation screen
+  if (showEmailConfirmation) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-6"
+      >
+        {/* Success Icon */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+          className="flex justify-center"
+        >
+          <div className="h-20 w-20 rounded-full bg-primary flex items-center justify-center shadow-xl shadow-primary/30">
+            <MailOpen className="h-10 w-10 text-white" />
+          </div>
+        </motion.div>
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-center space-y-2"
+        >
+          <h1 className="text-2xl font-bold text-foreground">
+            Check your <span className="text-primary">email</span>
+          </h1>
+          <p className="text-muted-foreground">
+            We&apos;ve sent a verification link to
+          </p>
+          <p className="font-semibold text-foreground">{email}</p>
+        </motion.div>
+
+        {/* Instructions Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
+        >
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <CheckCircle className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Next Steps</p>
+          </div>
+          <div className="p-4 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-semibold text-primary">1</span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Open your email inbox</p>
+                <p className="text-sm text-muted-foreground">Look for an email from CalorieCue</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-semibold text-primary">2</span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Click the verification link</p>
+                <p className="text-sm text-muted-foreground">This confirms your email address</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                <span className="text-xs font-semibold text-primary">3</span>
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Complete your profile setup</p>
+                <p className="text-sm text-muted-foreground">You&apos;ll be redirected automatically</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Warning */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-amber-500/10 rounded-2xl p-4 border border-amber-500/20"
+        >
+          <p className="text-sm text-amber-700 dark:text-amber-400 text-center">
+            <strong>Important:</strong> Please verify your email before continuing. Check your spam folder if you don&apos;t see the email.
+          </p>
+        </motion.div>
+
+        {/* Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="space-y-3"
+        >
+          <Button
+            variant="outline"
+            className="w-full h-12 rounded-xl text-base font-medium"
+            onClick={() => router.push("/login")}
+          >
+            Go to Sign In
+          </Button>
+          <p className="text-center text-sm text-muted-foreground">
+            Didn&apos;t receive the email?{" "}
+            <button
+              type="button"
+              onClick={() => setShowEmailConfirmation(false)}
+              className="text-primary hover:text-primary/80 font-medium"
+            >
+              Try again
+            </button>
+          </p>
+        </motion.div>
+      </motion.div>
+    )
   }
 
   const handleGoogleLogin = async () => {
