@@ -85,14 +85,14 @@ export default function RecipesPage() {
       <Header title="My Recipes" showBack />
 
       <div className="p-4 space-y-4">
-        {/* Search */}
+        {/* Search - iOS style */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             placeholder="Search recipes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-12 rounded-xl bg-card"
+            className="pl-11 h-12 rounded-xl bg-card border border-border/50 elevation-1"
           />
         </div>
 
@@ -143,7 +143,7 @@ export default function RecipesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-card rounded-2xl overflow-hidden elevation-1"
+                    className="bg-card rounded-2xl overflow-hidden elevation-1 border border-border/50"
                   >
                     <div className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -190,12 +190,13 @@ export default function RecipesPage() {
                           <span className="text-sm">{fatPerServing}g</span>
                         </div>
                         <div className="flex-1" />
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
                           onClick={() => handleDelete(recipe.id)}
                           className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors tap-highlight"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </motion.button>
                       </div>
                     </div>
                   </motion.div>

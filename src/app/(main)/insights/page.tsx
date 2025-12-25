@@ -4,8 +4,6 @@ import { useEffect, useState, lazy, Suspense } from "react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Flame,
@@ -17,8 +15,10 @@ import {
   Zap,
   Award,
 } from "lucide-react"
-import { subDays, format } from "date-fns"
+import { subDays } from "date-fns"
 import { toDateString } from "@/lib/utils/date"
+import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 // Lazy load chart component to reduce initial bundle (~80KB savings)
 const WeeklyCalorieChart = lazy(() =>
@@ -146,142 +146,174 @@ export default function InsightsPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-lg mx-auto p-4 space-y-4">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-48 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="max-w-lg mx-auto">
+        <Header title="Insights" />
+        <div className="p-4 space-y-4">
+          <Skeleton className="h-64 w-full rounded-2xl" />
+          <Skeleton className="h-48 w-full rounded-2xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-28 rounded-2xl" />
+            <Skeleton className="h-28 rounded-2xl" />
+          </div>
+        </div>
       </div>
     )
   }
 
   const caloriesDiff = averages.calories - goals.calories
   const isOverCalories = caloriesDiff > 0
+  const daysOnTarget = weeklyStats.filter((s) => s.calories > 0 && Math.abs(s.calories - goals.calories) <= 100).length
+  const totalCalories = weeklyStats.reduce((sum, s) => sum + s.calories, 0)
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto pb-24">
       <Header title="Insights" />
 
-      <div className="p-4 space-y-6">
-        {/* Weekly Summary */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
+      <div className="p-4 space-y-4">
+        {/* Weekly Summary Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card rounded-2xl elevation-1 border border-border/50 p-5"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
               <Flame className="h-4 w-4 text-orange-500" />
-              Weekly Average
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-3xl font-bold">{averages.calories}</p>
-                <p className="text-sm text-muted-foreground">cal/day average</p>
-              </div>
-              <div className={`flex items-center gap-1 ${isOverCalories ? "text-red-500" : "text-green-500"}`}>
-                {isOverCalories ? (
-                  <TrendingUp className="h-5 w-5" />
-                ) : (
-                  <TrendingDown className="h-5 w-5" />
-                )}
-                <span className="font-medium">
-                  {Math.abs(caloriesDiff)} {isOverCalories ? "over" : "under"}
-                </span>
-              </div>
             </div>
+            <h2 className="font-semibold">Weekly Average</h2>
+          </div>
 
-            {/* Calorie Chart - Lazy Loaded */}
-            <Suspense fallback={<Skeleton className="w-full h-[150px]" />}>
-              <WeeklyCalorieChart data={weeklyStats} />
-            </Suspense>
-          </CardContent>
-        </Card>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-4xl font-bold tabular-nums">{averages.calories}</p>
+              <p className="text-sm text-muted-foreground">cal/day average</p>
+            </div>
+            <div className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium",
+              isOverCalories
+                ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                : "bg-green-500/10 text-green-600 dark:text-green-400"
+            )}>
+              {isOverCalories ? (
+                <TrendingUp className="h-4 w-4" />
+              ) : (
+                <TrendingDown className="h-4 w-4" />
+              )}
+              <span>
+                {Math.abs(caloriesDiff)} {isOverCalories ? "over" : "under"}
+              </span>
+            </div>
+          </div>
+
+          {/* Calorie Chart - Lazy Loaded */}
+          <Suspense fallback={<Skeleton className="w-full h-[150px] rounded-xl" />}>
+            <WeeklyCalorieChart data={weeklyStats} />
+          </Suspense>
+        </motion.div>
 
         {/* Macro Averages */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Macro Breakdown</CardTitle>
-            <CardDescription>7-day averages vs. goals</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="bg-card rounded-2xl elevation-1 border border-border/50 p-5"
+        >
+          <div className="mb-4">
+            <h2 className="font-semibold">Macro Breakdown</h2>
+            <p className="text-sm text-muted-foreground">7-day averages vs. goals</p>
+          </div>
+
+          <div className="space-y-4">
             <MacroRow
               label="Protein"
               value={averages.protein}
               goal={goals.protein}
-              color="bg-red-500"
+              color="bg-rose-500"
+              bgColor="bg-rose-500/10"
             />
             <MacroRow
               label="Carbs"
               value={averages.carbs}
               goal={goals.carbs}
               color="bg-blue-500"
+              bgColor="bg-blue-500/10"
             />
             <MacroRow
               label="Fat"
               value={averages.fat}
               goal={goals.fat}
-              color="bg-yellow-500"
+              color="bg-amber-500"
+              bgColor="bg-amber-500/10"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Target className="h-8 w-8 mx-auto mb-2 text-primary" />
-              <p className="text-2xl font-bold">
-                {weeklyStats.filter((s) => s.calories > 0 && Math.abs(s.calories - goals.calories) <= 100).length}
-              </p>
-              <p className="text-sm text-muted-foreground">Days on target</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <Zap className="h-8 w-8 mx-auto mb-2 text-orange-500" />
-              <p className="text-2xl font-bold">
-                {weeklyStats.reduce((sum, s) => sum + s.calories, 0).toLocaleString()}
-              </p>
-              <p className="text-sm text-muted-foreground">Total calories</p>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Quick Stats Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 gap-3"
+        >
+          <div className="bg-card rounded-2xl elevation-1 border border-border/50 p-4 text-center">
+            <div className="h-12 w-12 mx-auto mb-2 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Target className="h-6 w-6 text-primary" />
+            </div>
+            <p className="text-3xl font-bold tabular-nums">{daysOnTarget}</p>
+            <p className="text-xs text-muted-foreground mt-1">Days on target</p>
+          </div>
+          <div className="bg-card rounded-2xl elevation-1 border border-border/50 p-4 text-center">
+            <div className="h-12 w-12 mx-auto mb-2 rounded-xl bg-orange-500/10 flex items-center justify-center">
+              <Zap className="h-6 w-6 text-orange-500" />
+            </div>
+            <p className="text-3xl font-bold tabular-nums">{totalCalories.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total calories</p>
+          </div>
+        </motion.div>
 
-        {/* View More Links */}
-        <div className="space-y-2">
-          <Link href="/profile/goals">
-            <Card className="hover:border-primary/50 transition-colors">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-                    <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Weight & Goals</p>
-                    <p className="text-sm text-muted-foreground">Update your target weight</p>
-                  </div>
+        {/* Navigation Links - iOS style */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-card rounded-2xl elevation-1 border border-border/50 divide-y divide-border/50"
+        >
+          <Link href="/profile/goals" className="block">
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center justify-between p-4 tap-highlight"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <Scale className="h-5 w-5 text-blue-500" />
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="font-medium">Weight & Goals</p>
+                  <p className="text-sm text-muted-foreground">Update your target weight</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </motion.div>
           </Link>
 
-          <Link href="/diary">
-            <Card className="hover:border-primary/50 transition-colors">
-              <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                    <Award className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <p className="font-medium">Food Diary</p>
-                    <p className="text-sm text-muted-foreground">View your daily meals</p>
-                  </div>
+          <Link href="/diary" className="block">
+            <motion.div
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center justify-between p-4 tap-highlight"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <Award className="h-5 w-5 text-green-500" />
                 </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground" />
-              </CardContent>
-            </Card>
+                <div>
+                  <p className="font-medium">Food Diary</p>
+                  <p className="text-sm text-muted-foreground">View your daily meals</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </motion.div>
           </Link>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
@@ -292,28 +324,39 @@ function MacroRow({
   value,
   goal,
   color,
+  bgColor,
 }: {
   label: string
   value: number
   goal: number
   color: string
+  bgColor: string
 }) {
   const percentage = Math.min((value / goal) * 100, 100)
   const isOver = value > goal
 
   return (
-    <div className="space-y-1">
-      <div className="flex justify-between text-sm">
+    <div className="space-y-2">
+      <div className="flex justify-between items-center">
         <span className="font-medium">{label}</span>
-        <span className={isOver ? "text-destructive font-medium" : "text-muted-foreground"}>
-          {value}g <span className="text-muted-foreground">/ {goal}g</span>
+        <span className={cn(
+          "text-sm tabular-nums",
+          isOver ? "text-destructive font-semibold" : "text-muted-foreground"
+        )}>
+          {value}g <span className="text-muted-foreground font-normal">/ {goal}g</span>
         </span>
       </div>
-      <Progress
-        value={percentage}
-        className="h-2"
-        indicatorClassName={isOver ? "bg-destructive" : color}
-      />
+      <div className={cn("h-2.5 rounded-full overflow-hidden", bgColor)}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className={cn(
+            "h-full rounded-full",
+            isOver ? "bg-destructive" : color
+          )}
+        />
+      </div>
     </div>
   )
 }
