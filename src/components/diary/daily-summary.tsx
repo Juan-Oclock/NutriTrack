@@ -122,7 +122,7 @@ export function DailySummary({
         {macros.map((macro, index) => {
           const percentage = Math.min((macro.consumed / macro.goal) * 100, 100)
           const macroIsOver = macro.consumed > macro.goal
-          const circumference = 2 * Math.PI * 16
+          const circumference = 2 * Math.PI * 22
 
           return (
             <motion.div
@@ -131,28 +131,28 @@ export function DailySummary({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + index * 0.05 }}
               className={cn(
-                "flex-1 flex flex-col items-center p-2.5 rounded-xl",
+                "flex-1 flex flex-col items-center p-3 rounded-xl",
                 macro.bgColor
               )}
             >
-              {/* Mini ring */}
-              <div className="relative w-10 h-10 mb-1.5">
-                <svg className="w-10 h-10 transform -rotate-90">
+              {/* Larger ring */}
+              <div className="relative w-14 h-14 mb-2">
+                <svg className="w-14 h-14 transform -rotate-90">
                   <circle
-                    cx="20"
-                    cy="20"
-                    r="16"
+                    cx="28"
+                    cy="28"
+                    r="22"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="3"
+                    strokeWidth="4"
                     className="text-background/50"
                   />
                   <motion.circle
-                    cx="20"
-                    cy="20"
-                    r="16"
+                    cx="28"
+                    cy="28"
+                    r="22"
                     fill="none"
-                    strokeWidth="3"
+                    strokeWidth="4"
                     strokeDasharray={circumference}
                     initial={{ strokeDashoffset: circumference }}
                     animate={{ strokeDashoffset: circumference - (percentage / 100) * circumference }}
@@ -163,23 +163,31 @@ export function DailySummary({
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className={cn(
-                    "text-[10px] font-bold",
+                    "text-sm font-bold tabular-nums",
                     macroIsOver ? "text-destructive" : macro.textColor
                   )}>
-                    {macro.short}
+                    {Math.round(percentage)}%
                   </span>
                 </div>
               </div>
 
+              {/* Label */}
+              <span className={cn(
+                "text-xs font-medium mb-1",
+                macro.textColor
+              )}>
+                {macro.label}
+              </span>
+
               {/* Values */}
               <div className="text-center">
                 <span className={cn(
-                  "text-sm font-bold tabular-nums",
+                  "text-base font-bold tabular-nums",
                   macroIsOver ? "text-destructive" : "text-foreground"
                 )}>
                   {Math.round(macro.consumed)}
                 </span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   /{macro.goal}g
                 </span>
               </div>

@@ -31,11 +31,10 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-6 max-w-lg mx-auto pb-24">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-32" />
-        </div>
+      <div
+        className="p-4 space-y-6 max-w-lg mx-auto pb-24"
+        style={{ paddingTop: `calc(${safeAreaTop} + 5rem)` }}
+      >
         <Skeleton className="h-[280px] w-full rounded-3xl" />
         <Skeleton className="h-[80px] w-full rounded-2xl" />
         <Skeleton className="h-[140px] w-full rounded-2xl" />
@@ -91,7 +90,7 @@ export default function DashboardPage() {
       {/* Content with top padding to account for fixed header */}
       <div
         className="p-4 space-y-5"
-        style={{ paddingTop: `calc(${safeAreaTop} + 4.5rem)` }}
+        style={{ paddingTop: `calc(${safeAreaTop} + 3.5rem)` }}
       >
 
       {/* Main Calorie Card */}
