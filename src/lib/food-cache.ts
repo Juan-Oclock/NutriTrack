@@ -45,7 +45,14 @@ export async function cacheUSDAFood(usdaFood: USDAFood): Promise<string | null> 
     .single()
 
   if (error) {
-    console.error("Error caching USDA food:", error)
+    console.error("Error caching USDA food:", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      food: usdaFood.name,
+      fdcId: usdaFood.fdcId,
+    })
     return null
   }
 

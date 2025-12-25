@@ -195,7 +195,7 @@ function SearchContent() {
         foodId = selectedFood.id
       }
 
-      const { error } = await supabase.from("diary_entries").insert({
+      const insertData = {
         user_id: user.id,
         date,
         meal_type: data.mealType,
@@ -210,15 +210,40 @@ function SearchContent() {
         logged_sugar_g: (selectedFood.sugar_g || 0) * multiplier * servings,
         logged_sodium_mg: (selectedFood.sodium_mg || 0) * multiplier * servings,
         logged_time: data.loggedTime,
-      } as never)
+      }
 
-      if (error) throw error
+      console.log("Inserting diary entry:", insertData)
+
+      const { error } = await supabase.from("diary_entries").insert(insertData as never)
+
+      if (error) {
+        console.error("Diary insert error:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        })
+        throw new Error(error.message || "Failed to insert diary entry")
+      }
 
       toast.success(`${selectedFood.name} added to ${data.mealType}`)
       router.push("/diary")
     } catch (error) {
-      console.error("Error logging food:", error)
-      toast.error("Failed to log food")
+      // Log detailed error info
+      const errorDetails = error && typeof error === 'object'
+        ? JSON.stringify(error, Object.getOwnPropertyNames(error))
+        : String(error)
+      console.error("Error logging food:", errorDetails)
+      console.error("Food details:", {
+        id: selectedFood.id,
+        name: selectedFood.name,
+        isUSDA: "isUSDA" in selectedFood && selectedFood.isUSDA,
+        isUserFood: "isUserFood" in selectedFood && selectedFood.isUserFood,
+      })
+
+      // Show more descriptive error
+      const message = error instanceof Error ? error.message : "Failed to log food"
+      toast.error(message)
       throw error
     }
   }
