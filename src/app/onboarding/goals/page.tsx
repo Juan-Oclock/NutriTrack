@@ -4,10 +4,8 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity, ArrowRight } from "lucide-react"
+import { Loader2, Target, Activity, Zap, Flame, ArrowRight, Check } from "lucide-react"
 import { toast } from "sonner"
 import {
   calculateAge,
@@ -17,20 +15,21 @@ import {
   type Gender,
 } from "@/lib/utils/nutrition"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 const goalOptions = [
-  { value: "lose_weight", label: "Lose Weight", description: "Burn fat & slim down", icon: TrendingDown, color: "text-blue-400", bg: "bg-blue-500/20", border: "border-blue-500/50" },
-  { value: "maintain_weight", label: "Maintain", description: "Stay at current weight", icon: Minus, color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/50" },
-  { value: "gain_weight", label: "Gain Weight", description: "Increase body mass", icon: TrendingUp, color: "text-orange-400", bg: "bg-orange-500/20", border: "border-orange-500/50" },
-  { value: "build_muscle", label: "Build Muscle", description: "Get stronger & leaner", icon: Dumbbell, color: "text-purple-400", bg: "bg-purple-500/20", border: "border-purple-500/50" },
+  { value: "lose_weight", label: "Lose Weight", description: "Burn fat & slim down", icon: "📉", color: "bg-blue-500" },
+  { value: "maintain_weight", label: "Maintain", description: "Stay at current weight", icon: "⚖️", color: "bg-emerald-500" },
+  { value: "gain_weight", label: "Gain Weight", description: "Increase body mass", icon: "📈", color: "bg-orange-500" },
+  { value: "build_muscle", label: "Build Muscle", description: "Get stronger & leaner", icon: "💪", color: "bg-purple-500" },
 ]
 
 const activityOptions = [
   { value: "sedentary", label: "Sedentary", description: "Little or no exercise", icon: "🪑" },
-  { value: "lightly_active", label: "Light", description: "1-3 days/week", icon: "🚶" },
-  { value: "moderately_active", label: "Moderate", description: "3-5 days/week", icon: "🏃" },
-  { value: "very_active", label: "Active", description: "6-7 days/week", icon: "💪" },
-  { value: "extremely_active", label: "Athlete", description: "Intense training", icon: "🏋️" },
+  { value: "lightly_active", label: "Lightly Active", description: "Light exercise 1-3 days/week", icon: "🚶" },
+  { value: "moderately_active", label: "Moderately Active", description: "Moderate exercise 3-5 days/week", icon: "🏃" },
+  { value: "very_active", label: "Very Active", description: "Hard exercise 6-7 days/week", icon: "💪" },
+  { value: "extremely_active", label: "Extremely Active", description: "Very hard exercise & physical job", icon: "🏋️" },
 ]
 
 export default function GoalsPage() {
@@ -170,48 +169,58 @@ export default function GoalsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-2"
       >
-        <h1 className="text-2xl font-bold text-white">
-          Set your{" "}
-          <span className="text-primary">
-            goals
-          </span>
+        <h1 className="text-2xl font-bold text-foreground">
+          Set your <span className="text-primary">goals</span>
         </h1>
-        <p className="text-slate-400">Tell us what you want to achieve</p>
+        <p className="text-muted-foreground">
+          Tell us what you want to achieve
+        </p>
       </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Goal Type */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <Target className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Target className="h-3.5 w-3.5 text-primary" />
             </div>
-            What&apos;s your goal?
-          </Label>
-          <div className="grid grid-cols-2 gap-3">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Goal</p>
+          </div>
+          <div className="p-4 grid grid-cols-2 gap-2">
             {goalOptions.map((option) => (
               <motion.button
                 key={option.value}
                 type="button"
-                onClick={() => setGoalType(option.value as GoalType)}
-                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`p-4 rounded-2xl border-2 text-left transition-all ${
+                onClick={() => setGoalType(option.value as GoalType)}
+                className={cn(
+                  "p-3 rounded-xl text-left transition-all relative",
                   goalType === option.value
-                    ? `${option.border} ${option.bg} shadow-lg`
-                    : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
-                }`}
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
               >
-                <div className={`h-10 w-10 rounded-xl ${option.bg} flex items-center justify-center mb-2`}>
-                  <option.icon className={`h-5 w-5 ${option.color}`} />
-                </div>
-                <p className="font-semibold text-white text-sm">{option.label}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{option.description}</p>
+                <span className="text-xl block mb-1">{option.icon}</span>
+                <p className={cn(
+                  "font-semibold text-sm",
+                  goalType === option.value ? "text-primary-foreground" : "text-foreground"
+                )}>
+                  {option.label}
+                </p>
+                <p className={cn(
+                  "text-xs mt-0.5",
+                  goalType === option.value ? "text-primary-foreground/80" : "text-muted-foreground"
+                )}>
+                  {option.description}
+                </p>
+                {goalType === option.value && (
+                  <Check className="h-4 w-4 absolute top-3 right-3" />
+                )}
               </motion.button>
             ))}
           </div>
@@ -222,31 +231,41 @@ export default function GoalsPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <Activity className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <Activity className="h-3.5 w-3.5 text-orange-500" />
             </div>
-            Activity Level
-          </Label>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Activity Level</p>
+          </div>
+          <div className="divide-y divide-border/50">
             {activityOptions.map((option) => (
               <motion.button
                 key={option.value}
                 type="button"
+                whileTap={{ scale: 0.99 }}
                 onClick={() => setActivityLevel(option.value as ActivityLevel)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`flex-shrink-0 p-3 rounded-xl border-2 text-center transition-all min-w-[85px] ${
-                  activityLevel === option.value
-                    ? "border-primary bg-primary/20 shadow-lg shadow-primary/20"
-                    : "border-slate-700 bg-slate-800/50 hover:border-slate-600"
-                }`}
+                className={cn(
+                  "w-full p-4 flex items-center gap-3 text-left transition-colors",
+                  activityLevel === option.value ? "bg-primary/5" : "hover:bg-muted/50"
+                )}
               >
-                <span className="text-2xl block mb-1">{option.icon}</span>
-                <p className="font-medium text-white text-xs">{option.label}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{option.description}</p>
+                <span className="text-2xl">{option.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className={cn(
+                    "font-medium text-sm",
+                    activityLevel === option.value ? "text-primary" : "text-foreground"
+                  )}>
+                    {option.label}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {option.description}
+                  </p>
+                </div>
+                {activityLevel === option.value && (
+                  <Check className="h-5 w-5 text-primary shrink-0" />
+                )}
               </motion.button>
             ))}
           </div>
@@ -257,19 +276,19 @@ export default function GoalsPage() {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-4"
+            className="bg-card rounded-2xl overflow-hidden elevation-1"
           >
-            <Label className="flex items-center gap-2 text-white">
-              <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-                <Zap className="h-3.5 w-3.5 text-white" />
+            <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+              <div className="h-6 w-6 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <Zap className="h-3.5 w-3.5 text-purple-500" />
               </div>
-              Weekly Goal
-            </Label>
-            <div className="bg-slate-800/50 rounded-2xl p-5 border border-slate-700">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-slate-400 text-sm">Pace</span>
-                <div className="px-3 py-1.5 rounded-lg bg-primary/20 border border-primary/30">
-                  <span className="text-xl font-bold text-primary">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Weekly Pace</p>
+            </div>
+            <div className="p-4 space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Target pace</span>
+                <div className="px-3 py-1.5 rounded-lg bg-primary/10">
+                  <span className="text-lg font-bold text-primary">
                     {weeklyGoal[0]} kg/week
                   </span>
                 </div>
@@ -282,7 +301,7 @@ export default function GoalsPage() {
                 step={0.25}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-slate-500 mt-3">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Gradual</span>
                 <span>Moderate</span>
                 <span>Aggressive</span>
@@ -296,28 +315,32 @@ export default function GoalsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-primary/10 rounded-2xl p-5 border border-primary/30"
+            className="bg-card rounded-2xl overflow-hidden elevation-1"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <Flame className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-white">Your Daily Targets</h3>
+            <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+              <div className="h-6 w-6 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <Flame className="h-3.5 w-3.5 text-red-500" />
+              </div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Daily Targets</p>
             </div>
-            <div className="grid grid-cols-4 gap-3">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">{calculatedGoals.calories}</p>
-                <p className="text-xs text-slate-400">Calories</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-red-400">{calculatedGoals.protein_g}g</p>
-                <p className="text-xs text-slate-400">Protein</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-400">{calculatedGoals.carbs_g}g</p>
-                <p className="text-xs text-slate-400">Carbs</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-yellow-400">{calculatedGoals.fat_g}g</p>
-                <p className="text-xs text-slate-400">Fat</p>
+            <div className="p-4">
+              <div className="grid grid-cols-4 gap-3">
+                <div className="text-center p-3 rounded-xl bg-primary/10">
+                  <p className="text-xl font-bold text-primary">{calculatedGoals.calories}</p>
+                  <p className="text-xs text-muted-foreground">Calories</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-red-500/10">
+                  <p className="text-xl font-bold text-red-500">{calculatedGoals.protein_g}g</p>
+                  <p className="text-xs text-muted-foreground">Protein</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-blue-500/10">
+                  <p className="text-xl font-bold text-blue-500">{calculatedGoals.carbs_g}g</p>
+                  <p className="text-xs text-muted-foreground">Carbs</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-yellow-500/10">
+                  <p className="text-xl font-bold text-yellow-600">{calculatedGoals.fat_g}g</p>
+                  <p className="text-xs text-muted-foreground">Fat</p>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -333,7 +356,7 @@ export default function GoalsPage() {
           <Button
             type="submit"
             size="lg"
-            className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
+            className="w-full h-14 rounded-2xl text-lg font-semibold shadow-lg shadow-primary/25 group"
             disabled={isLoading || !goalType || !activityLevel}
           >
             {isLoading ? (

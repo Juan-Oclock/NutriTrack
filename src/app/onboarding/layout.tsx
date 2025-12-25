@@ -21,10 +21,10 @@ export default function OnboardingLayout({
   const showProgress = pathname !== "/onboarding/welcome" && pathname !== "/onboarding/complete"
 
   return (
-    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Safe area cover for iOS */}
       <div
-        className="fixed top-0 left-0 right-0 z-50 bg-slate-950"
+        className="fixed top-0 left-0 right-0 z-50 bg-background"
         style={{ height: 'env(safe-area-inset-top, 0px)' }}
         aria-hidden="true"
       />
@@ -45,10 +45,10 @@ export default function OnboardingLayout({
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-center mb-8"
         >
-          <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25 glow-primary">
+          <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25">
             <Leaf className="h-6 w-6 text-white" />
           </div>
-          <span className="ml-3 text-2xl font-bold text-white tracking-tight">CalorieCue</span>
+          <span className="ml-3 text-2xl font-bold text-foreground tracking-tight">CalorieCue</span>
         </motion.div>
 
         {/* Progress Steps */}
@@ -75,14 +75,14 @@ export default function OnboardingLayout({
                             ? "bg-primary text-white shadow-lg shadow-primary/25"
                             : isCurrent
                             ? "bg-primary text-white shadow-lg shadow-primary/25 ring-4 ring-primary/20"
-                            : "bg-slate-800/80 text-slate-500 border border-slate-700"
+                            : "bg-muted text-muted-foreground border border-border"
                         }`}
                       >
                         {isComplete ? <Check className="h-5 w-5" /> : index + 1}
                       </motion.div>
                       <span
                         className={`text-xs font-medium mt-2 transition-colors ${
-                          isComplete || isCurrent ? "text-white" : "text-slate-500"
+                          isComplete || isCurrent ? "text-foreground" : "text-muted-foreground"
                         }`}
                       >
                         {step.label}
@@ -91,7 +91,7 @@ export default function OnboardingLayout({
                     {index < steps.length - 3 && (
                       <div
                         className={`w-12 h-0.5 mx-2 rounded-full transition-colors ${
-                          isComplete ? "bg-primary" : "bg-slate-700"
+                          isComplete ? "bg-primary" : "bg-border"
                         }`}
                       />
                     )}

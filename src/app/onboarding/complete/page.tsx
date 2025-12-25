@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Utensils, Camera, BarChart3, Sparkles, Download, Share, X, Smartphone } from "lucide-react"
+import { CheckCircle, Utensils, Camera, BarChart3, Sparkles, Download, Share, X, Smartphone, ArrowRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import confetti from "canvas-confetti"
 import { useEffect, useState } from "react"
@@ -18,22 +18,22 @@ const steps = [
     icon: Utensils,
     title: "Log your meals",
     description: "Track breakfast, lunch, dinner & snacks",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/20",
+    iconBg: "bg-emerald-500/10",
+    iconColor: "text-emerald-500",
   },
   {
     icon: Camera,
     title: "Scan barcodes",
     description: "Quickly log packaged foods",
-    color: "text-blue-400",
-    bg: "bg-blue-500/20",
+    iconBg: "bg-blue-500/10",
+    iconColor: "text-blue-500",
   },
   {
     icon: BarChart3,
     title: "Track progress",
     description: "View insights & nutrition trends",
-    color: "text-purple-400",
-    bg: "bg-purple-500/20",
+    iconBg: "bg-purple-500/10",
+    iconColor: "text-purple-500",
   },
 ]
 
@@ -140,7 +140,7 @@ export default function CompletePage() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="space-y-8"
+      className="space-y-6"
     >
       {/* Success Icon */}
       <div className="text-center space-y-4">
@@ -161,10 +161,10 @@ export default function CompletePage() {
           transition={{ delay: 0.3 }}
           className="space-y-2"
         >
-          <h1 className="text-3xl font-bold text-white flex items-center justify-center gap-2">
-            You're all set! <Sparkles className="h-7 w-7 text-yellow-400" />
+          <h1 className="text-3xl font-bold text-foreground flex items-center justify-center gap-2">
+            You&apos;re all set! <Sparkles className="h-7 w-7 text-yellow-500" />
           </h1>
-          <p className="text-slate-400 text-lg">
+          <p className="text-muted-foreground text-lg">
             Your personalized nutrition plan is ready
           </p>
         </motion.div>
@@ -175,26 +175,26 @@ export default function CompletePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="space-y-4"
+        className="bg-card rounded-2xl overflow-hidden elevation-1"
       >
-        <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wide text-center">
-          What's Next
-        </h2>
-        <div className="space-y-3">
+        <div className="px-4 py-3 border-b border-border/50">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">What&apos;s Next</p>
+        </div>
+        <div className="divide-y divide-border/50">
           {steps.map((step, index) => (
             <motion.div
               key={step.title}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + index * 0.1 }}
-              className="flex items-center gap-4 p-4 rounded-2xl bg-slate-800/50 border border-slate-700"
+              className="flex items-center gap-4 p-4"
             >
-              <div className={`h-12 w-12 rounded-xl ${step.bg} flex items-center justify-center shrink-0`}>
-                <step.icon className={`h-6 w-6 ${step.color}`} />
+              <div className={`h-12 w-12 rounded-xl ${step.iconBg} flex items-center justify-center shrink-0`}>
+                <step.icon className={`h-6 w-6 ${step.iconColor}`} />
               </div>
               <div>
-                <p className="font-semibold text-white">{step.title}</p>
-                <p className="text-sm text-slate-400">{step.description}</p>
+                <p className="font-semibold text-foreground">{step.title}</p>
+                <p className="text-sm text-muted-foreground">{step.description}</p>
               </div>
             </motion.div>
           ))}
@@ -207,27 +207,25 @@ export default function CompletePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="p-4 rounded-2xl bg-primary/10 border border-primary/30"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <div className="flex items-start gap-4">
-            <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-              <Smartphone className="h-6 w-6 text-primary" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Smartphone className="h-3.5 w-3.5 text-primary" />
             </div>
-            <div className="flex-1 space-y-3">
-              <div>
-                <h3 className="font-semibold text-white">Install CalorieCue</h3>
-                <p className="text-sm text-slate-400">
-                  Add to your home screen for quick access and offline support
-                </p>
-              </div>
-              <Button
-                onClick={isIOS ? () => setShowIOSInstructions(true) : handleInstallClick}
-                className="w-full bg-primary hover:bg-primary/90"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Install App
-              </Button>
-            </div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Install App</p>
+          </div>
+          <div className="p-4 space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Add CalorieCue to your home screen for quick access and offline support
+            </p>
+            <Button
+              onClick={isIOS ? () => setShowIOSInstructions(true) : handleInstallClick}
+              className="w-full h-12 rounded-xl"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Install App
+            </Button>
           </div>
         </motion.div>
       )}
@@ -247,62 +245,62 @@ export default function CompletePage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-slate-800 w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl border border-slate-700"
+              className="bg-card w-full max-w-md rounded-2xl p-6 space-y-4 shadow-xl elevation-2"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Install CalorieCue</h3>
+                <h3 className="text-lg font-semibold text-foreground">Install CalorieCue</h3>
                 <button
                   onClick={() => setShowIOSInstructions(false)}
-                  className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center"
+                  className="h-8 w-8 rounded-full bg-muted flex items-center justify-center"
                 >
-                  <X className="h-4 w-4 text-slate-300" />
+                  <X className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
 
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 To install CalorieCue on your iPhone, follow these steps:
               </p>
 
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <span className="text-sm font-semibold text-primary">1</span>
                   </div>
                   <div>
-                    <p className="font-medium text-white">Tap the Share button</p>
-                    <p className="text-sm text-slate-400 flex items-center gap-1">
+                    <p className="font-medium text-foreground">Tap the Share button</p>
+                    <p className="text-sm text-muted-foreground flex items-center gap-1">
                       Look for the <Share className="h-4 w-4 inline" /> icon at the bottom of Safari
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <span className="text-sm font-semibold text-primary">2</span>
                   </div>
                   <div>
-                    <p className="font-medium text-white">Scroll down and tap &quot;Add to Home Screen&quot;</p>
-                    <p className="text-sm text-slate-400">You may need to scroll to find it</p>
+                    <p className="font-medium text-foreground">Scroll down and tap &quot;Add to Home Screen&quot;</p>
+                    <p className="text-sm text-muted-foreground">You may need to scroll to find it</p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                     <span className="text-sm font-semibold text-primary">3</span>
                   </div>
                   <div>
-                    <p className="font-medium text-white">Tap &quot;Add&quot; in the top right</p>
-                    <p className="text-sm text-slate-400">CalorieCue will appear on your home screen</p>
+                    <p className="font-medium text-foreground">Tap &quot;Add&quot; in the top right</p>
+                    <p className="text-sm text-muted-foreground">CalorieCue will appear on your home screen</p>
                   </div>
                 </div>
               </div>
 
-              <button
+              <Button
                 onClick={() => setShowIOSInstructions(false)}
-                className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium"
+                className="w-full h-12 rounded-xl"
               >
                 Got it
-              </button>
+              </Button>
             </motion.div>
           </motion.div>
         )}
@@ -313,16 +311,18 @@ export default function CompletePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: canShowInstall ? 0.9 : 0.8 }}
+        className="pt-2"
       >
         <Button
           size="lg"
-          className="w-full h-14 rounded-xl text-lg font-semibold bg-primary hover:bg-primary/90"
+          className="w-full h-14 rounded-2xl text-lg font-semibold shadow-lg shadow-primary/25 group"
           onClick={() => router.push("/dashboard")}
         >
           Go to Dashboard
+          <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
         </Button>
         {canShowInstall && (
-          <p className="text-center text-sm text-slate-500 mt-2">
+          <p className="text-center text-sm text-muted-foreground mt-2">
             You can also install later from Settings
           </p>
         )}

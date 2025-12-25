@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Loader2, User, Calendar, Ruler, Scale, ArrowRight } from "lucide-react"
+import { Loader2, User, Calendar, Ruler, Scale, ArrowRight, Check } from "lucide-react"
 import { toast } from "sonner"
 import { feetToCm, lbsToKg } from "@/lib/utils/nutrition"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 type Gender = "male" | "female" | "other" | "prefer_not_to_say"
 
@@ -98,46 +98,48 @@ export default function ProfilePage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-2"
       >
-        <h1 className="text-2xl font-bold text-white">
-          Tell us about{" "}
-          <span className="text-primary">
-            yourself
-          </span>
+        <h1 className="text-2xl font-bold text-foreground">
+          Tell us about <span className="text-primary">yourself</span>
         </h1>
-        <p className="text-slate-400">
+        <p className="text-muted-foreground">
           This helps us calculate your personalized nutrition goals
         </p>
       </motion.div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Gender Selection */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <User className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-purple-500/10 flex items-center justify-center">
+              <User className="h-3.5 w-3.5 text-purple-500" />
             </div>
-            Gender
-          </Label>
-          <div className="grid grid-cols-2 gap-2">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Gender</p>
+          </div>
+          <div className="p-4 grid grid-cols-2 gap-2">
             {genderOptions.map((option) => (
-              <button
+              <motion.button
                 key={option.value}
                 type="button"
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setGender(option.value as Gender)}
-                className={`p-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center gap-2 ${
+                className={cn(
+                  "p-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between",
                   gender === option.value
-                    ? "border-primary bg-primary/20 text-white shadow-lg shadow-primary/20"
-                    : "border-slate-700 bg-slate-800/50 text-slate-300 hover:border-slate-600"
-                }`}
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground"
+                )}
               >
-                <span className="text-lg">{option.icon}</span>
-                {option.label}
-              </button>
+                <span className="flex items-center gap-2">
+                  <span className="text-lg">{option.icon}</span>
+                  {option.label}
+                </span>
+                {gender === option.value && <Check className="h-4 w-4" />}
+              </motion.button>
             ))}
           </div>
         </motion.div>
@@ -147,22 +149,24 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <Calendar className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-orange-500/10 flex items-center justify-center">
+              <Calendar className="h-3.5 w-3.5 text-orange-500" />
             </div>
-            Date of Birth
-          </Label>
-          <Input
-            type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            max={new Date().toISOString().split("T")[0]}
-            required
-            className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl focus:border-purple-500 focus:ring-purple-500/20"
-          />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Date of Birth</p>
+          </div>
+          <div className="p-4">
+            <Input
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              max={new Date().toISOString().split("T")[0]}
+              required
+              className="h-12 rounded-xl border-0 bg-muted/50 focus-visible:ring-1 focus-visible:ring-primary"
+            />
+          </div>
         </motion.div>
 
         {/* Height */}
@@ -170,82 +174,88 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <Ruler className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-blue-500/10 flex items-center justify-center">
+              <Ruler className="h-3.5 w-3.5 text-blue-500" />
             </div>
-            Height
-          </Label>
-
-          {/* Unit Toggle */}
-          <div className="flex bg-slate-800/50 rounded-xl p-1 border border-slate-700">
-            <button
-              type="button"
-              onClick={() => setHeightUnit("imperial")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                heightUnit === "imperial"
-                  ? "bg-primary text-white shadow-lg"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              ft / in
-            </button>
-            <button
-              type="button"
-              onClick={() => setHeightUnit("metric")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                heightUnit === "metric"
-                  ? "bg-primary text-white shadow-lg"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              cm
-            </button>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Height</p>
           </div>
-
-          {heightUnit === "metric" ? (
-            <Input
-              type="number"
-              placeholder="170"
-              value={heightCm}
-              onChange={(e) => setHeightCm(e.target.value)}
-              min="100"
-              max="250"
-              required={heightUnit === "metric"}
-              className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl text-center text-lg"
-            />
-          ) : (
-            <div className="flex gap-3">
-              <div className="flex-1 relative">
-                <Input
-                  type="number"
-                  placeholder="5"
-                  value={heightFeet}
-                  onChange={(e) => setHeightFeet(e.target.value)}
-                  min="3"
-                  max="8"
-                  required={heightUnit === "imperial"}
-                  className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl text-center text-lg pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">ft</span>
-              </div>
-              <div className="flex-1 relative">
-                <Input
-                  type="number"
-                  placeholder="10"
-                  value={heightInches}
-                  onChange={(e) => setHeightInches(e.target.value)}
-                  min="0"
-                  max="11"
-                  required={heightUnit === "imperial"}
-                  className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl text-center text-lg pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">in</span>
-              </div>
+          <div className="p-4 space-y-3">
+            {/* Unit Toggle */}
+            <div className="flex bg-muted rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => setHeightUnit("imperial")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all",
+                  heightUnit === "imperial"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                ft / in
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeightUnit("metric")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all",
+                  heightUnit === "metric"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                cm
+              </button>
             </div>
-          )}
+
+            {heightUnit === "metric" ? (
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="170"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                  min="100"
+                  max="250"
+                  required={heightUnit === "metric"}
+                  className="h-12 rounded-xl border-0 bg-muted/50 text-center text-lg pr-12 focus-visible:ring-1 focus-visible:ring-primary"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">cm</span>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Input
+                    type="number"
+                    placeholder="5"
+                    value={heightFeet}
+                    onChange={(e) => setHeightFeet(e.target.value)}
+                    min="3"
+                    max="8"
+                    required={heightUnit === "imperial"}
+                    className="h-12 rounded-xl border-0 bg-muted/50 text-center text-lg pr-10 focus-visible:ring-1 focus-visible:ring-primary"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">ft</span>
+                </div>
+                <div className="flex-1 relative">
+                  <Input
+                    type="number"
+                    placeholder="10"
+                    value={heightInches}
+                    onChange={(e) => setHeightInches(e.target.value)}
+                    min="0"
+                    max="11"
+                    required={heightUnit === "imperial"}
+                    className="h-12 rounded-xl border-0 bg-muted/50 text-center text-lg pr-10 focus-visible:ring-1 focus-visible:ring-primary"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">in</span>
+                </div>
+              </div>
+            )}
+          </div>
         </motion.div>
 
         {/* Weight */}
@@ -253,72 +263,75 @@ export default function ProfilePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2 text-white">
-            <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-              <Scale className="h-3.5 w-3.5 text-white" />
+          <div className="px-4 py-3 border-b border-border/50 flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <Scale className="h-3.5 w-3.5 text-emerald-500" />
             </div>
-            Current Weight
-          </Label>
-
-          {/* Unit Toggle */}
-          <div className="flex bg-slate-800/50 rounded-xl p-1 border border-slate-700">
-            <button
-              type="button"
-              onClick={() => setWeightUnit("imperial")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                weightUnit === "imperial"
-                  ? "bg-primary text-white shadow-lg"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              lbs
-            </button>
-            <button
-              type="button"
-              onClick={() => setWeightUnit("metric")}
-              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-                weightUnit === "metric"
-                  ? "bg-primary text-white shadow-lg"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              kg
-            </button>
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">Current Weight</p>
           </div>
+          <div className="p-4 space-y-3">
+            {/* Unit Toggle */}
+            <div className="flex bg-muted rounded-xl p-1">
+              <button
+                type="button"
+                onClick={() => setWeightUnit("imperial")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all",
+                  weightUnit === "imperial"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                lbs
+              </button>
+              <button
+                type="button"
+                onClick={() => setWeightUnit("metric")}
+                className={cn(
+                  "flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all",
+                  weightUnit === "metric"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
+                )}
+              >
+                kg
+              </button>
+            </div>
 
-          {weightUnit === "metric" ? (
-            <div className="relative">
-              <Input
-                type="number"
-                placeholder="70"
-                value={weightKg}
-                onChange={(e) => setWeightKg(e.target.value)}
-                min="30"
-                max="300"
-                step="0.1"
-                required={weightUnit === "metric"}
-                className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl text-center text-lg pr-12"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">kg</span>
-            </div>
-          ) : (
-            <div className="relative">
-              <Input
-                type="number"
-                placeholder="150"
-                value={weightLbs}
-                onChange={(e) => setWeightLbs(e.target.value)}
-                min="66"
-                max="660"
-                step="0.1"
-                required={weightUnit === "imperial"}
-                className="bg-slate-800/50 border-slate-700 text-white h-12 rounded-xl text-center text-lg pr-12"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">lbs</span>
-            </div>
-          )}
+            {weightUnit === "metric" ? (
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="70"
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(e.target.value)}
+                  min="30"
+                  max="300"
+                  step="0.1"
+                  required={weightUnit === "metric"}
+                  className="h-12 rounded-xl border-0 bg-muted/50 text-center text-lg pr-12 focus-visible:ring-1 focus-visible:ring-primary"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">kg</span>
+              </div>
+            ) : (
+              <div className="relative">
+                <Input
+                  type="number"
+                  placeholder="150"
+                  value={weightLbs}
+                  onChange={(e) => setWeightLbs(e.target.value)}
+                  min="66"
+                  max="660"
+                  step="0.1"
+                  required={weightUnit === "imperial"}
+                  className="h-12 rounded-xl border-0 bg-muted/50 text-center text-lg pr-12 focus-visible:ring-1 focus-visible:ring-primary"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">lbs</span>
+              </div>
+            )}
+          </div>
         </motion.div>
 
         {/* Submit Button */}
@@ -331,7 +344,7 @@ export default function ProfilePage() {
           <Button
             type="submit"
             size="lg"
-            className="w-full h-14 rounded-2xl text-lg font-semibold bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 group"
+            className="w-full h-14 rounded-2xl text-lg font-semibold shadow-lg shadow-primary/25 group"
             disabled={isLoading || !gender || !dateOfBirth}
           >
             {isLoading ? (
