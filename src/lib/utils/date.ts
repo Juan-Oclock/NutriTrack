@@ -87,3 +87,18 @@ export function getCurrentWeekDays(): Date[] {
   const end = getEndOfWeek(today)
   return getDaysInRange(start, end)
 }
+
+/**
+ * Returns the default meal type based on current time of day
+ * - Before 11 AM: breakfast
+ * - 11 AM - 3 PM: lunch
+ * - 3 PM - 8 PM: dinner
+ * - After 8 PM: snacks
+ */
+export function getDefaultMealType(): "breakfast" | "lunch" | "dinner" | "snacks" {
+  const hour = new Date().getHours()
+  if (hour < 11) return "breakfast"
+  if (hour < 15) return "lunch"
+  if (hour < 20) return "dinner"
+  return "snacks"
+}

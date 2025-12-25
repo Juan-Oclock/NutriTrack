@@ -5,9 +5,12 @@ import { createClient } from "@/lib/supabase/client"
 import { DateSelector } from "@/components/diary/date-selector"
 import { DailySummary } from "@/components/diary/daily-summary"
 import { MealSection } from "@/components/diary/meal-section"
+import { SegmentedControl } from "@/components/ui/segmented-control"
 import { Skeleton } from "@/components/ui/skeleton"
-import { toDateString } from "@/lib/utils/date"
+import { toDateString, getDefaultMealType } from "@/lib/utils/date"
 import { toast } from "sonner"
+import { Sun, Utensils, Moon, Cookie } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import type { QuickAddEntry, NutritionGoal, MealType } from "@/types/database"
 
 // Extended type for diary entries with joined food data
@@ -27,8 +30,16 @@ interface DiaryEntryWithFood {
 
 const mealTypes: MealType[] = ["breakfast", "lunch", "dinner", "snacks"]
 
+const mealOptions: { value: MealType; label: string; icon: React.ReactNode }[] = [
+  { value: "breakfast", label: "Breakfast", icon: <Sun className="h-4 w-4" /> },
+  { value: "lunch", label: "Lunch", icon: <Utensils className="h-4 w-4" /> },
+  { value: "dinner", label: "Dinner", icon: <Moon className="h-4 w-4" /> },
+  { value: "snacks", label: "Snacks", icon: <Cookie className="h-4 w-4" /> },
+]
+
 export default function DiaryPage() {
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [selectedMeal, setSelectedMeal] = useState<MealType>(getDefaultMealType)
   const [diaryEntries, setDiaryEntries] = useState<DiaryEntryWithFood[]>([])
   const [quickAddEntries, setQuickAddEntries] = useState<QuickAddEntry[]>([])
   const [goals, setGoals] = useState<NutritionGoal | null>(null)
@@ -141,16 +152,24 @@ export default function DiaryPage() {
     }, {} as Record<MealType, (DiaryEntryWithFood | QuickAddEntry)[]>)
   }, [diaryEntries, quickAddEntries])
 
+  // Calculate calories for selected meal
+  const selectedMealCalories = useMemo(() => {
+    return entriesByMeal[selectedMeal]?.reduce((sum, entry) => {
+      if ("logged_calories" in entry) {
+        return sum + (entry.logged_calories || 0)
+      }
+      return sum + (entry.calories || 0)
+    }, 0) || 0
+  }, [entriesByMeal, selectedMeal])
+
   if (isLoading) {
     return (
       <div className="max-w-lg mx-auto pb-24">
         <Skeleton className="h-[120px] w-full" />
         <Skeleton className="h-[100px] w-full" />
         <div className="p-4 space-y-3">
-          <Skeleton className="h-[100px] w-full rounded-2xl" />
-          <Skeleton className="h-[100px] w-full rounded-2xl" />
-          <Skeleton className="h-[100px] w-full rounded-2xl" />
-          <Skeleton className="h-[100px] w-full rounded-2xl" />
+          <Skeleton className="h-[48px] w-full rounded-xl" />
+          <Skeleton className="h-[200px] w-full rounded-2xl" />
         </div>
       </div>
     )
@@ -182,16 +201,41 @@ export default function DiaryPage() {
         }}
       />
 
-      <div className="p-4 space-y-3">
-        {mealTypes.map((mealType, index) => (
-          <MealSection
-            key={mealType}
-            mealType={mealType}
-            entries={entriesByMeal[mealType]}
-            date={toDateString(selectedDate)}
-            onDeleteEntry={handleDeleteEntry}
-          />
-        ))}
+      <div className="p-4 space-y-4">
+        {/* Segmented Control */}
+        <SegmentedControl
+          options={mealOptions}
+          value={selectedMeal}
+          onChange={setSelectedMeal}
+          className="w-full"
+        />
+
+        {/* Selected Meal Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold capitalize">{selectedMeal}</h2>
+          <div className="text-right">
+            <span className="text-2xl font-bold tabular-nums">{Math.round(selectedMealCalories)}</span>
+            <span className="text-sm text-muted-foreground ml-1">cal</span>
+          </div>
+        </div>
+
+        {/* Meal Content with Animation */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedMeal}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <MealSection
+              mealType={selectedMeal}
+              entries={entriesByMeal[selectedMeal]}
+              date={toDateString(selectedDate)}
+              onDeleteEntry={handleDeleteEntry}
+            />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )
