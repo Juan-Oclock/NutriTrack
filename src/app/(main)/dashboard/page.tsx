@@ -14,12 +14,14 @@ import { motion } from "framer-motion"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { useDashboardData } from "@/hooks/use-dashboard-data"
 import { useUserId } from "@/hooks/use-user"
+import { useSafeAreaTop } from "@/components/layout/safe-area-top"
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
   const { userId, isLoading: isUserLoading } = useUserId()
   const { profile, goals, streak, todaySummary, isLoading: isDataLoading } = useDashboardData(userId)
+  const safeAreaTop = useSafeAreaTop()
 
   const isLoading = isUserLoading || isDataLoading
 
@@ -57,7 +59,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="fixed left-0 right-0 z-40 bg-background/80 backdrop-blur-lg border-b border-border/50"
-        style={{ top: 'env(safe-area-inset-top, 0px)' }}
+        style={{ top: safeAreaTop }}
       >
         <div className="flex items-end justify-between px-4 py-3 max-w-lg mx-auto">
           <div>
@@ -89,7 +91,7 @@ export default function DashboardPage() {
       {/* Content with top padding to account for fixed header */}
       <div
         className="p-4 space-y-5"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4.5rem)' }}
+        style={{ paddingTop: `calc(${safeAreaTop} + 4.5rem)` }}
       >
 
       {/* Main Calorie Card */}
