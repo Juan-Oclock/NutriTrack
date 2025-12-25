@@ -8,12 +8,23 @@ import { FeaturesSection } from "./features-section"
 import { BenefitsSection } from "./benefits-section"
 import { SocialProofSection } from "./social-proof-section"
 import { CTASection } from "./cta-section"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [safeAreaTop, setSafeAreaTop] = useState('env(safe-area-inset-top, 0px)')
+
+  useEffect(() => {
+    // Detect if running as installed PWA and apply fallback
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
+
+    if (isStandalone) {
+      setSafeAreaTop('max(env(safe-area-inset-top, 47px), 47px)')
+    }
+  }, [])
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -25,7 +36,7 @@ export function LandingPage() {
       {/* Safe area cover for iOS */}
       <div
         className="fixed top-0 left-0 right-0 z-[60] bg-background"
-        style={{ height: 'env(safe-area-inset-top, 0px)' }}
+        style={{ height: safeAreaTop }}
         aria-hidden="true"
       />
 
@@ -34,7 +45,7 @@ export function LandingPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="fixed left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50"
-        style={{ top: 'env(safe-area-inset-top, 0px)' }}
+        style={{ top: safeAreaTop }}
       >
         <nav className="container mx-auto px-4 max-w-7xl">
           <div className="flex items-center justify-between h-14">
@@ -132,7 +143,7 @@ export function LandingPage() {
       {/* Main content */}
       <main
         className="pt-14"
-        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
+        style={{ paddingTop: `calc(${safeAreaTop} + 3.5rem)` }}
       >
         <HeroSection />
         <FeaturesSection />
