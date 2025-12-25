@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, BookOpen, Plus, CalendarDays, User } from "lucide-react"
+import { Home, BookOpen, Plus, BarChart2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { motion } from "framer-motion"
 
@@ -18,7 +18,7 @@ const navItems = [
   { href: "/dashboard", label: "Home", icon: Home },
   { href: "/diary", label: "Diary", icon: BookOpen },
   { href: "/add-food", label: "Add", icon: Plus, isCenter: true, dynamic: true },
-  { href: "/plans", label: "Plans", icon: CalendarDays },
+  { href: "/insights", label: "Insights", icon: BarChart2 },
   { href: "/profile", label: "Profile", icon: User },
 ]
 

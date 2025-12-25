@@ -8,8 +8,9 @@ import { SegmentedControl } from "@/components/ui/segmented-control"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toDateString, getDefaultMealType } from "@/lib/utils/date"
 import { toast } from "sonner"
-import { Sun, Utensils, Moon, Cookie } from "lucide-react"
+import { Sun, Utensils, Moon, Cookie, CalendarDays, ChevronRight } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link"
 import { useDiaryData, type DiaryEntryWithFood } from "@/hooks/use-diary-data"
 import { useUserId } from "@/hooks/use-user"
 import type { QuickAddEntry, MealType } from "@/types/database"
@@ -131,6 +132,29 @@ export default function DiaryPage() {
           goal: goals?.fat_goal_g || 65,
         }}
       />
+
+      {/* Meal Plans Quick Access */}
+      <Link href="/plans" className="block">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileTap={{ scale: 0.98 }}
+          className="mx-4 mt-4 bg-card rounded-2xl elevation-1 border border-border/50 p-4 tap-highlight"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <CalendarDays className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold">Meal Plans</p>
+                <p className="text-sm text-muted-foreground">Plan your weekly meals</p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
+        </motion.div>
+      </Link>
 
       <div className="p-4 space-y-4">
         {/* Segmented Control */}
