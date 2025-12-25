@@ -35,18 +35,6 @@ export const CalorieRing = memo(function CalorieRing({
 
   return (
     <div className={cn("relative inline-flex items-center justify-center", className)}>
-      {/* Outer glow effect */}
-      <div
-        className={cn(
-          "absolute rounded-full opacity-20 blur-xl",
-          isOver ? "bg-destructive" : "bg-primary"
-        )}
-        style={{
-          width: size + 40,
-          height: size + 40,
-        }}
-      />
-
       <svg width={size} height={size} className="transform -rotate-90">
         <defs>
           <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">

@@ -21,7 +21,8 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       goal: protein.goal,
       ringColor: "stroke-rose-500",
       textColor: "text-rose-500",
-      bgColor: "bg-rose-500/10",
+      bgColor: "bg-rose-100 dark:bg-rose-500/20",
+      borderColor: "border-rose-200 dark:border-rose-500/30",
     },
     {
       label: "Carbs",
@@ -30,7 +31,8 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       goal: carbs.goal,
       ringColor: "stroke-blue-500",
       textColor: "text-blue-500",
-      bgColor: "bg-blue-500/10",
+      bgColor: "bg-blue-100 dark:bg-blue-500/20",
+      borderColor: "border-blue-200 dark:border-blue-500/30",
     },
     {
       label: "Fat",
@@ -39,7 +41,8 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
       goal: fat.goal,
       ringColor: "stroke-amber-500",
       textColor: "text-amber-500",
-      bgColor: "bg-amber-500/10",
+      bgColor: "bg-amber-100 dark:bg-amber-500/20",
+      borderColor: "border-amber-200 dark:border-amber-500/30",
     },
   ]
 
@@ -113,8 +116,9 @@ export const MacroBars = memo(function MacroBars({ protein, carbs, fat, classNam
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6 + index * 0.1, type: "spring", stiffness: 200 }}
             className={cn(
-              "flex-1 flex flex-col items-center p-3 rounded-2xl",
-              macro.bgColor
+              "flex-1 flex flex-col items-center p-3 rounded-2xl border",
+              macro.bgColor,
+              macro.borderColor
             )}
           >
             {/* Circular Progress */}
