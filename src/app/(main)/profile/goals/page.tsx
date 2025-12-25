@@ -5,17 +5,42 @@ import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Loader2, Target, Dumbbell, TrendingDown, TrendingUp, Minus, Zap, Flame, Activity, Check, Scale } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import {
+  Loader2,
+  Target,
+  Dumbbell,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  Zap,
+  Flame,
+  Activity,
+  Check,
+  Scale,
+  ChevronRight,
+  ChevronDown,
+  User,
+  Calendar,
+  Ruler,
+  Users,
+} from "lucide-react"
 import { toast } from "sonner"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import {
   calculateAge,
   calculateNutritionGoals,
+  feetToCm,
+  cmToFeet,
   type ActivityLevel,
   type GoalType,
   type Gender,
@@ -23,19 +48,103 @@ import {
 import type { Profile, NutritionGoal } from "@/types/database"
 
 const goalOptions = [
-  { value: "lose_weight", label: "Lose Weight", icon: TrendingDown, color: "from-blue-500 to-blue-600" },
-  { value: "maintain_weight", label: "Maintain", icon: Minus, color: "from-emerald-500 to-emerald-600" },
-  { value: "gain_weight", label: "Gain Weight", icon: TrendingUp, color: "from-orange-500 to-orange-600" },
-  { value: "build_muscle", label: "Build Muscle", icon: Dumbbell, color: "from-purple-500 to-purple-600" },
+  { value: "lose_weight", label: "Lose Weight", icon: TrendingDown, color: "bg-blue-500" },
+  { value: "maintain_weight", label: "Maintain", icon: Minus, color: "bg-emerald-500" },
+  { value: "gain_weight", label: "Gain Weight", icon: TrendingUp, color: "bg-orange-500" },
+  { value: "build_muscle", label: "Build Muscle", icon: Dumbbell, color: "bg-purple-500" },
 ]
 
 const activityOptions = [
-  { value: "sedentary", label: "Sedentary", icon: "🪑" },
-  { value: "lightly_active", label: "Light", icon: "🚶" },
-  { value: "moderately_active", label: "Moderate", icon: "🏃" },
-  { value: "very_active", label: "Active", icon: "💪" },
-  { value: "extremely_active", label: "Athlete", icon: "🏋️" },
+  { value: "sedentary", label: "Sedentary", description: "Little to no exercise, desk job", icon: "🪑" },
+  { value: "lightly_active", label: "Light", description: "Light exercise 1-3 times/week", icon: "🚶" },
+  { value: "moderately_active", label: "Moderate", description: "Moderate exercise 3-5 times/week", icon: "🏃" },
+  { value: "very_active", label: "Active", description: "Hard exercise 6-7 times/week", icon: "💪" },
+  { value: "extremely_active", label: "Athlete", description: "Very hard exercise, physical job", icon: "🏋️" },
 ]
+
+const genderOptions = [
+  { value: "male", label: "Male", icon: "♂️" },
+  { value: "female", label: "Female", icon: "♀️" },
+  { value: "other", label: "Other", icon: "⚧️" },
+  { value: "prefer_not_to_say", label: "Prefer not to say", icon: "🤐" },
+]
+
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="px-4 py-3 border-b border-border/50">
+      <p className="text-xs text-muted-foreground uppercase tracking-wide">{title}</p>
+    </div>
+  )
+}
+
+function SettingRow({
+  icon: Icon,
+  iconColor = "text-primary",
+  iconBg = "bg-primary/10",
+  label,
+  value,
+  description,
+  action,
+  onClick,
+  border = false,
+  showChevron = false,
+}: {
+  icon?: React.ElementType
+  iconColor?: string
+  iconBg?: string
+  label: string
+  value?: string | React.ReactNode
+  description?: string
+  action?: React.ReactNode
+  onClick?: () => void
+  border?: boolean
+  showChevron?: boolean
+}) {
+  const content = (
+    <>
+      <div className="flex items-center gap-3">
+        {Icon && (
+          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", iconBg)}>
+            <Icon className={cn("h-5 w-5", iconColor)} />
+          </div>
+        )}
+        <div className="text-left">
+          <p className="font-medium">{label}</p>
+          {description && (
+            <p className="text-sm text-muted-foreground">{description}</p>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {value && <span className="text-muted-foreground">{value}</span>}
+        {action}
+        {showChevron && <ChevronRight className="h-5 w-5 text-muted-foreground" />}
+      </div>
+    </>
+  )
+
+  if (onClick) {
+    return (
+      <motion.button
+        whileTap={{ scale: 0.98 }}
+        onClick={onClick}
+        type="button"
+        className={cn(
+          "w-full flex items-center justify-between p-4 tap-highlight",
+          border && "border-t border-border/50"
+        )}
+      >
+        {content}
+      </motion.button>
+    )
+  }
+
+  return (
+    <div className={cn("flex items-center justify-between p-4", border && "border-t border-border/50")}>
+      {content}
+    </div>
+  )
+}
 
 export default function GoalsPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -53,6 +162,20 @@ export default function GoalsPage() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Personal details state
+  const [personalDetailsOpen, setPersonalDetailsOpen] = useState(false)
+  const [dateOfBirth, setDateOfBirth] = useState<string>("")
+  const [heightCm, setHeightCm] = useState("")
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft-in">("cm")
+  const [heightFeet, setHeightFeet] = useState("")
+  const [heightInches, setHeightInches] = useState("")
+  const [gender, setGender] = useState<Gender | "">("")
+  const [age, setAge] = useState<number | null>(null)
+
+  // Edit sheet state
+  const [editingField, setEditingField] = useState<string | null>(null)
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -89,6 +212,20 @@ export default function GoalsPage() {
           if (typedProfile.target_weight_kg) {
             setTargetWeight(typedProfile.target_weight_kg.toString())
           }
+          // Personal details
+          if (typedProfile.date_of_birth) {
+            setDateOfBirth(typedProfile.date_of_birth.split("T")[0])
+            setAge(calculateAge(new Date(typedProfile.date_of_birth)))
+          }
+          if (typedProfile.height_cm) {
+            setHeightCm(typedProfile.height_cm.toString())
+            const { feet, inches } = cmToFeet(typedProfile.height_cm)
+            setHeightFeet(feet.toString())
+            setHeightInches(inches.toString())
+          }
+          if (typedProfile.gender) {
+            setGender(typedProfile.gender as Gender)
+          }
         }
         if (goalsData) setCurrentGoals(goalsData as NutritionGoal)
       } catch (error) {
@@ -100,21 +237,40 @@ export default function GoalsPage() {
     loadData()
   }, [supabase])
 
+  // Recalculate goals when any input changes
   useEffect(() => {
-    if (profile && goalType && activityLevel && profile.date_of_birth && currentWeight) {
-      const age = calculateAge(new Date(profile.date_of_birth))
+    if (profile && goalType && activityLevel && currentWeight) {
+      // Calculate age from DOB
+      const currentAge = dateOfBirth
+        ? calculateAge(new Date(dateOfBirth))
+        : profile.date_of_birth
+          ? calculateAge(new Date(profile.date_of_birth))
+          : null
+
+      if (!currentAge) return
+      setAge(currentAge)
+
+      // Calculate height
+      let finalHeightCm = parseFloat(heightCm)
+      if (heightUnit === "ft-in" && (heightFeet || heightInches)) {
+        finalHeightCm = feetToCm(parseInt(heightFeet) || 0, parseInt(heightInches) || 0)
+      }
+      if (!finalHeightCm || isNaN(finalHeightCm)) {
+        finalHeightCm = profile.height_cm || 170
+      }
+
       const goals = calculateNutritionGoals({
         weight_kg: parseFloat(currentWeight) || profile.current_weight_kg || 70,
-        height_cm: profile.height_cm || 170,
-        age,
-        gender: (profile.gender as Gender) || "male",
+        height_cm: finalHeightCm,
+        age: currentAge,
+        gender: (gender as Gender) || (profile.gender as Gender) || "male",
         activity_level: activityLevel as ActivityLevel,
         goal_type: goalType as GoalType,
         weekly_goal_kg: goalType !== "maintain_weight" ? weeklyGoal[0] : undefined,
       })
       setCalculatedGoals(goals)
     }
-  }, [profile, goalType, activityLevel, weeklyGoal, currentWeight])
+  }, [profile, goalType, activityLevel, weeklyGoal, currentWeight, dateOfBirth, heightCm, heightUnit, heightFeet, heightInches, gender])
 
   const handleSave = async () => {
     if (!calculatedGoals || !profile) return
@@ -127,10 +283,21 @@ export default function GoalsPage() {
         return
       }
 
-      // Update profile
+      // Calculate final height
+      let finalHeightCm = parseFloat(heightCm)
+      if (heightUnit === "ft-in" && (heightFeet || heightInches)) {
+        finalHeightCm = feetToCm(parseInt(heightFeet) || 0, parseInt(heightInches) || 0)
+      }
+
+      // Update profile with personal details + goals
       await supabase
         .from("profiles")
         .update({
+          // Personal details
+          date_of_birth: dateOfBirth || profile.date_of_birth,
+          height_cm: finalHeightCm || profile.height_cm,
+          gender: gender || profile.gender,
+          // Goal settings
           goal_type: goalType,
           activity_level: activityLevel,
           weekly_goal_kg: goalType !== "maintain_weight" ? weeklyGoal[0] : null,
@@ -171,14 +338,62 @@ export default function GoalsPage() {
 
   const showWeeklyGoal = goalType === "lose_weight" || goalType === "gain_weight"
 
+  const formatHeight = () => {
+    if (heightUnit === "cm") {
+      return heightCm ? `${heightCm} cm` : profile?.height_cm ? `${profile.height_cm} cm` : "--"
+    } else {
+      if (heightFeet || heightInches) {
+        return `${heightFeet || 0}' ${heightInches || 0}"`
+      }
+      if (profile?.height_cm) {
+        const { feet, inches } = cmToFeet(profile.height_cm)
+        return `${feet}' ${inches}"`
+      }
+      return "--"
+    }
+  }
+
+  const formatGender = (g: Gender | "") => {
+    const option = genderOptions.find(o => o.value === g)
+    return option ? option.label : "--"
+  }
+
+  const getWeightDifferenceText = () => {
+    const current = parseFloat(currentWeight)
+    const target = parseFloat(targetWeight)
+    if (isNaN(current) || isNaN(target)) return null
+
+    if (current > target) {
+      return <span className="text-primary">{(current - target).toFixed(1)} kg to lose</span>
+    } else if (current < target) {
+      return <span className="text-orange-500">{(target - current).toFixed(1)} kg to gain</span>
+    }
+    return <span className="text-emerald-500">At target weight!</span>
+  }
+
+  const handleHeightUnitChange = (unit: "cm" | "ft-in") => {
+    if (unit === heightUnit) return
+    setHeightUnit(unit)
+
+    if (unit === "ft-in" && heightCm) {
+      const { feet, inches } = cmToFeet(parseFloat(heightCm))
+      setHeightFeet(feet.toString())
+      setHeightInches(inches.toString())
+    } else if (unit === "cm" && (heightFeet || heightInches)) {
+      const cm = feetToCm(parseInt(heightFeet) || 0, parseInt(heightInches) || 0)
+      setHeightCm(cm.toString())
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="max-w-lg mx-auto pb-24">
         <Header title="Nutrition Goals" showBack />
         <div className="p-4 space-y-4">
+          <Skeleton className="h-20 w-full rounded-2xl" />
           <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-24 w-full rounded-2xl" />
-          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
         </div>
       </div>
     )
@@ -189,189 +404,190 @@ export default function GoalsPage() {
       <Header title="Nutrition Goals" showBack />
 
       <div className="p-4 space-y-5">
-        {/* Current Goals */}
-        {currentGoals && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card rounded-2xl p-4 elevation-1"
-          >
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Current Daily Targets</p>
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div>
-                <p className="text-xl font-bold text-primary">{currentGoals.calories_goal}</p>
-                <p className="text-[10px] text-muted-foreground">Calories</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold text-protein">{currentGoals.protein_goal_g}g</p>
-                <p className="text-[10px] text-muted-foreground">Protein</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold text-carbs">{currentGoals.carbs_goal_g}g</p>
-                <p className="text-[10px] text-muted-foreground">Carbs</p>
-              </div>
-              <div>
-                <p className="text-xl font-bold text-fat">{currentGoals.fat_goal_g}g</p>
-                <p className="text-[10px] text-muted-foreground">Fat</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+        {/* Personal Details Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
+        >
+          <SectionHeader title="Personal Details" />
 
-        {/* Weight Section */}
+          <SettingRow
+            icon={personalDetailsOpen ? ChevronDown : User}
+            iconBg="bg-indigo-500/10"
+            iconColor="text-indigo-500"
+            label="Personal Details"
+            value={personalDetailsOpen ? "Hide" : "Edit"}
+            onClick={() => setPersonalDetailsOpen(!personalDetailsOpen)}
+            showChevron={!personalDetailsOpen}
+          />
+
+          <AnimatePresence>
+            {personalDetailsOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden"
+              >
+                <SettingRow
+                  icon={Calendar}
+                  iconBg="bg-orange-500/10"
+                  iconColor="text-orange-500"
+                  label="Age"
+                  value={age ? `${age} years` : "--"}
+                  onClick={() => setEditingField("age")}
+                  showChevron
+                  border
+                />
+
+                <SettingRow
+                  icon={Ruler}
+                  iconBg="bg-blue-500/10"
+                  iconColor="text-blue-500"
+                  label="Height"
+                  value={formatHeight()}
+                  onClick={() => setEditingField("height")}
+                  showChevron
+                  border
+                />
+
+                <SettingRow
+                  icon={Users}
+                  iconBg="bg-purple-500/10"
+                  iconColor="text-purple-500"
+                  label="Gender"
+                  value={formatGender(gender)}
+                  onClick={() => setEditingField("gender")}
+                  showChevron
+                  border
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* Body Metrics Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2">
-            <Scale className="h-4 w-4 text-purple-500" />
-            Weight
-          </Label>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Current (kg)</label>
-              <Input
-                type="number"
-                placeholder="70"
-                value={currentWeight}
-                onChange={(e) => setCurrentWeight(e.target.value)}
-                min="30"
-                max="300"
-                step="0.1"
-                className="h-12 text-center text-lg font-semibold"
-              />
+          <SectionHeader title="Body Metrics" />
+
+          <div className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Scale className="h-5 w-5 text-emerald-500" />
+                </div>
+                <span className="font-medium">Current Weight</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={currentWeight}
+                  onChange={(e) => setCurrentWeight(e.target.value)}
+                  className="w-20 h-10 text-center rounded-xl"
+                  placeholder="70"
+                  min="30"
+                  max="300"
+                  step="0.1"
+                />
+                <span className="text-muted-foreground text-sm">kg</span>
+              </div>
             </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Target (kg)</label>
-              <Input
-                type="number"
-                placeholder="65"
-                value={targetWeight}
-                onChange={(e) => setTargetWeight(e.target.value)}
-                min="30"
-                max="300"
-                step="0.1"
-                className="h-12 text-center text-lg font-semibold"
-              />
+
+            <div className="flex items-center justify-between border-t border-border/50 pt-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <Target className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <span className="font-medium">Target Weight</span>
+                  {getWeightDifferenceText() && (
+                    <p className="text-xs">{getWeightDifferenceText()}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={targetWeight}
+                  onChange={(e) => setTargetWeight(e.target.value)}
+                  className="w-20 h-10 text-center rounded-xl"
+                  placeholder="65"
+                  min="30"
+                  max="300"
+                  step="0.1"
+                />
+                <span className="text-muted-foreground text-sm">kg</span>
+              </div>
             </div>
           </div>
-          {currentWeight && targetWeight && (
-            <p className="text-xs text-center text-muted-foreground">
-              {parseFloat(currentWeight) > parseFloat(targetWeight) ? (
-                <span className="text-primary font-medium">
-                  {(parseFloat(currentWeight) - parseFloat(targetWeight)).toFixed(1)} kg to lose
-                </span>
-              ) : parseFloat(currentWeight) < parseFloat(targetWeight) ? (
-                <span className="text-orange-500 font-medium">
-                  {(parseFloat(targetWeight) - parseFloat(currentWeight)).toFixed(1)} kg to gain
-                </span>
-              ) : (
-                <span className="text-emerald-500 font-medium">At target weight!</span>
-              )}
-            </p>
-          )}
         </motion.div>
 
-        {/* Goal Type */}
+        {/* Goal Type Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-primary" />
-            What&apos;s your goal?
-          </Label>
-          <div className="grid grid-cols-2 gap-2">
-            {goalOptions.map((option) => {
-              const isSelected = goalType === option.value
-              return (
-                <motion.button
-                  key={option.value}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={() => setGoalType(option.value as GoalType)}
-                  className={cn(
-                    "p-4 rounded-2xl text-left transition-all tap-highlight relative overflow-hidden",
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card elevation-1"
-                  )}
-                >
-                  {isSelected && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="h-4 w-4" />
-                    </div>
-                  )}
-                  <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center mb-2",
-                    isSelected ? "bg-white/20" : option.color
-                  )}>
-                    <option.icon className={cn("h-5 w-5", isSelected ? "" : "text-white")} />
-                  </div>
-                  <p className="font-semibold text-sm">{option.label}</p>
-                </motion.button>
-              )
-            })}
-          </div>
+          <SectionHeader title="Your Goal" />
+
+          <SettingRow
+            icon={Target}
+            label="Goal Type"
+            value={goalOptions.find(g => g.value === goalType)?.label || "Select"}
+            onClick={() => setEditingField("goalType")}
+            showChevron
+          />
         </motion.div>
 
-        {/* Activity Level */}
+        {/* Activity Level Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="space-y-3"
+          className="bg-card rounded-2xl overflow-hidden elevation-1"
         >
-          <Label className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-primary" />
-            Activity Level
-          </Label>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {activityOptions.map((option) => {
-              const isSelected = activityLevel === option.value
-              return (
-                <motion.button
-                  key={option.value}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={() => setActivityLevel(option.value as ActivityLevel)}
-                  className={cn(
-                    "flex-shrink-0 p-3 rounded-xl text-center transition-all min-w-[70px] tap-highlight",
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-card elevation-1"
-                  )}
-                >
-                  <span className="text-2xl block mb-1">{option.icon}</span>
-                  <p className="font-medium text-xs">{option.label}</p>
-                </motion.button>
-              )
-            })}
-          </div>
+          <SectionHeader title="Activity Level" />
+
+          <SettingRow
+            icon={Activity}
+            label="Activity"
+            value={activityOptions.find(a => a.value === activityLevel)?.label || "Select"}
+            description={activityOptions.find(a => a.value === activityLevel)?.description}
+            onClick={() => setEditingField("activityLevel")}
+            showChevron
+          />
         </motion.div>
 
-        {/* Weekly Goal Slider */}
+        {/* Weekly Pace Section */}
         {showWeeklyGoal && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="space-y-3"
+            className="bg-card rounded-2xl overflow-hidden elevation-1"
           >
-            <Label className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-primary" />
-              Weekly Goal
-            </Label>
-            <div className="bg-card rounded-2xl p-4 elevation-1">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-muted-foreground text-sm">Pace</span>
+            <SectionHeader title="Weekly Pace" />
+
+            <div className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="font-medium">Pace</span>
+                </div>
                 <span className="text-xl font-bold text-primary">
                   {weeklyGoal[0]} kg/week
                 </span>
               </div>
+
               <Slider
                 value={weeklyGoal}
                 onValueChange={setWeeklyGoal}
@@ -380,7 +596,8 @@ export default function GoalsPage() {
                 step={0.25}
                 className="w-full"
               />
-              <div className="flex justify-between text-xs text-muted-foreground mt-2">
+
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Gradual</span>
                 <span>Moderate</span>
                 <span>Aggressive</span>
@@ -437,6 +654,233 @@ export default function GoalsPage() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Age Edit Sheet */}
+      <Sheet open={editingField === "age"} onOpenChange={() => setEditingField(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Edit Date of Birth</SheetTitle>
+          </SheetHeader>
+          <div className="py-6 space-y-4">
+            <Input
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => {
+                setDateOfBirth(e.target.value)
+                if (e.target.value) {
+                  setAge(calculateAge(new Date(e.target.value)))
+                }
+              }}
+              max={new Date().toISOString().split("T")[0]}
+              className="h-12 rounded-xl"
+            />
+            {age && (
+              <p className="text-center text-muted-foreground">
+                You are <span className="font-semibold text-foreground">{age}</span> years old
+              </p>
+            )}
+          </div>
+          <Button
+            onClick={() => setEditingField(null)}
+            className="w-full h-12 rounded-xl"
+          >
+            Done
+          </Button>
+        </SheetContent>
+      </Sheet>
+
+      {/* Height Edit Sheet */}
+      <Sheet open={editingField === "height"} onOpenChange={() => setEditingField(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Edit Height</SheetTitle>
+          </SheetHeader>
+          <div className="py-6 space-y-4">
+            {/* Unit Toggle */}
+            <div className="flex bg-muted rounded-lg p-1">
+              {(["cm", "ft-in"] as const).map((unit) => (
+                <button
+                  key={unit}
+                  onClick={() => handleHeightUnitChange(unit)}
+                  className={cn(
+                    "flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all",
+                    heightUnit === unit
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground"
+                  )}
+                >
+                  {unit === "cm" ? "Centimeters" : "Feet & Inches"}
+                </button>
+              ))}
+            </div>
+
+            {heightUnit === "cm" ? (
+              <div className="space-y-2">
+                <Input
+                  type="number"
+                  placeholder="170"
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                  className="h-12 rounded-xl text-center text-lg"
+                  min="100"
+                  max="250"
+                />
+                <p className="text-center text-sm text-muted-foreground">centimeters</p>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <div className="flex-1 space-y-2">
+                  <Input
+                    type="number"
+                    placeholder="5"
+                    value={heightFeet}
+                    onChange={(e) => setHeightFeet(e.target.value)}
+                    className="h-12 rounded-xl text-center text-lg"
+                    min="3"
+                    max="8"
+                  />
+                  <p className="text-center text-sm text-muted-foreground">feet</p>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Input
+                    type="number"
+                    placeholder="10"
+                    value={heightInches}
+                    onChange={(e) => setHeightInches(e.target.value)}
+                    className="h-12 rounded-xl text-center text-lg"
+                    min="0"
+                    max="11"
+                  />
+                  <p className="text-center text-sm text-muted-foreground">inches</p>
+                </div>
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={() => setEditingField(null)}
+            className="w-full h-12 rounded-xl"
+          >
+            Done
+          </Button>
+        </SheetContent>
+      </Sheet>
+
+      {/* Gender Edit Sheet */}
+      <Sheet open={editingField === "gender"} onOpenChange={() => setEditingField(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>Select Gender</SheetTitle>
+          </SheetHeader>
+          <div className="py-4 space-y-2">
+            {genderOptions.map((option) => (
+              <motion.button
+                key={option.value}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setGender(option.value as Gender)
+                  setEditingField(null)
+                }}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 rounded-xl transition-all",
+                  gender === option.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{option.icon}</span>
+                  <span className="font-medium">{option.label}</span>
+                </div>
+                {gender === option.value && <Check className="h-5 w-5" />}
+              </motion.button>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Goal Type Edit Sheet */}
+      <Sheet open={editingField === "goalType"} onOpenChange={() => setEditingField(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>Select Your Goal</SheetTitle>
+          </SheetHeader>
+          <div className="py-4 space-y-2 overflow-y-auto">
+            {goalOptions.map((option) => (
+              <motion.button
+                key={option.value}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setGoalType(option.value as GoalType)
+                  setEditingField(null)
+                }}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 rounded-xl transition-all",
+                  goalType === option.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "h-10 w-10 rounded-xl flex items-center justify-center",
+                    goalType === option.value ? "bg-white/20" : option.color
+                  )}>
+                    <option.icon className={cn(
+                      "h-5 w-5",
+                      goalType === option.value ? "" : "text-white"
+                    )} />
+                  </div>
+                  <span className="font-medium">{option.label}</span>
+                </div>
+                {goalType === option.value && <Check className="h-5 w-5" />}
+              </motion.button>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Activity Level Edit Sheet */}
+      <Sheet open={editingField === "activityLevel"} onOpenChange={() => setEditingField(null)}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh]">
+          <SheetHeader>
+            <SheetTitle>Select Activity Level</SheetTitle>
+          </SheetHeader>
+          <div className="py-4 space-y-2 overflow-y-auto">
+            {activityOptions.map((option) => (
+              <motion.button
+                key={option.value}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setActivityLevel(option.value as ActivityLevel)
+                  setEditingField(null)
+                }}
+                className={cn(
+                  "w-full flex items-center justify-between p-4 rounded-xl transition-all text-left",
+                  activityLevel === option.value
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{option.icon}</span>
+                  <div>
+                    <p className="font-medium">{option.label}</p>
+                    <p className={cn(
+                      "text-sm",
+                      activityLevel === option.value
+                        ? "text-primary-foreground/80"
+                        : "text-muted-foreground"
+                    )}>
+                      {option.description}
+                    </p>
+                  </div>
+                </div>
+                {activityLevel === option.value && <Check className="h-5 w-5" />}
+              </motion.button>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
