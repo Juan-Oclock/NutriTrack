@@ -22,14 +22,22 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Safe area cover for iOS */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[60] bg-background"
+        style={{ height: 'env(safe-area-inset-top, 0px)' }}
+        aria-hidden="true"
+      />
+
       {/* Navigation */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50"
+        className="fixed left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50"
+        style={{ top: 'env(safe-area-inset-top, 0px)' }}
       >
         <nav className="container mx-auto px-4 max-w-7xl">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
               <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
@@ -122,7 +130,10 @@ export function LandingPage() {
       </motion.header>
 
       {/* Main content */}
-      <main className="pt-16">
+      <main
+        className="pt-14"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
+      >
         <HeroSection />
         <FeaturesSection />
         <BenefitsSection />

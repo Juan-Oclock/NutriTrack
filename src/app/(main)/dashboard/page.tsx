@@ -51,37 +51,42 @@ export default function DashboardPage() {
   const firstName = profile?.full_name?.split(" ")[0] || "there"
 
   return (
-    <div className="p-4 space-y-5 max-w-lg mx-auto pb-24">
-      {/* Header */}
+    <div className="max-w-lg mx-auto pb-24">
+      {/* Sticky Header */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="pt-2 flex items-end justify-between"
+        className="sticky z-40 bg-background/80 backdrop-blur-lg border-b border-border/50"
+        style={{ top: 'env(safe-area-inset-top, 0px)' }}
       >
-        <div>
-          <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
-          <h1 className="text-2xl font-bold tracking-tight">
-            {greeting()}, {firstName}
-          </h1>
-        </div>
-        {mounted && (
-          <div className="flex items-center gap-2">
-            <NotificationBell />
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="h-10 w-10 rounded-xl bg-card elevation-1 flex items-center justify-center tap-highlight"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5 text-amber-500" />
-              ) : (
-                <Moon className="h-5 w-5 text-slate-600" />
-              )}
-            </motion.button>
+        <div className="flex items-end justify-between px-4 py-3">
+          <div>
+            <p className="text-muted-foreground text-sm">{formatDiaryDate(new Date())}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {greeting()}, {firstName}
+            </h1>
           </div>
-        )}
+          {mounted && (
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="h-10 w-10 rounded-xl bg-card elevation-1 flex items-center justify-center tap-highlight"
+                aria-label="Toggle theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="h-5 w-5 text-amber-500" />
+                ) : (
+                  <Moon className="h-5 w-5 text-slate-600" />
+                )}
+              </motion.button>
+            </div>
+          )}
+        </div>
       </motion.div>
+
+      <div className="p-4 space-y-5">
 
       {/* Main Calorie Card */}
       <motion.div
@@ -218,6 +223,7 @@ export default function DashboardPage() {
           </Link>
         </motion.div>
       )}
+      </div>
     </div>
   )
 }
