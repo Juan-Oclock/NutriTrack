@@ -67,8 +67,18 @@ const faqs = [
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-background">
+      {/* Safe area cover for iOS */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 bg-background"
+        style={{ height: 'env(safe-area-inset-top, 0px)' }}
+        aria-hidden="true"
+      />
+
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+      <header
+        className="sticky z-50 bg-background/80 backdrop-blur-lg border-b border-border/50"
+        style={{ top: 'env(safe-area-inset-top, 0px)' }}
+      >
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">

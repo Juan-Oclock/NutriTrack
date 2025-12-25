@@ -79,7 +79,10 @@ export function DateSelector({ selectedDate, onDateChange, isFetching }: DateSel
     : format(selectedDate, "MMMM d")
 
   return (
-    <div className="bg-card sticky top-0 z-40 border-b border-border/50">
+    <div
+      className="bg-card sticky z-40 border-b border-border/50"
+      style={{ top: 'env(safe-area-inset-top, 0px)' }}
+    >
       {/* Month and navigation header */}
       <div className="flex items-center justify-between px-4 py-3">
         <motion.button
